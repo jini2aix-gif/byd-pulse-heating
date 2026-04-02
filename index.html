@@ -57,49 +57,7 @@ tailwind.config = {
 }
 </script>
 </head>
-<body class="antialiased overflow-hidden">
-
-<!-- Password Protection Overlay -->
-<div id="password-gate" class="fixed inset-0 z-[100] flex items-center justify-center bg-brandBase">
-    <div class="glass p-12 rounded-3xl border border-gray-700 shadow-2xl max-w-md w-full text-center space-y-8 animate-pulse-glow">
-        <div class="space-y-4">
-            <div class="w-20 h-20 bg-brandBlue/10 rounded-2xl flex items-center justify-center mx-auto text-brandBlue text-4xl">🔐</div>
-            <h2 class="text-2xl font-black text-white tracking-tight">PROTECTED ACCESS</h2>
-            <p class="text-gray-400 text-sm">BYD Technical Pulse Heating Analysis<br/>Please enter the authorization code.</p>
-        </div>
-        
-        <div class="space-y-4 text-left">
-            <label class="text-[10px] text-gray-500 uppercase font-bold tracking-widest ml-1">Engineering Code</label>
-            <input type="password" id="auth-code" 
-                   class="w-full bg-brandBase/80 border border-gray-600 rounded-xl px-4 py-4 text-white text-lg font-mono focus:border-brandBlue outline-none transition-all placeholder:text-gray-700"
-                   placeholder="········"
-                   onkeydown="if(event.key === 'Enter') verifyAuth()">
-            <div id="auth-error" class="hidden text-red-500 text-xs font-bold mt-2 ml-1">INVALID AUTHORIZATION CODE</div>
-        </div>
-
-        <button onclick="verifyAuth()" 
-                class="w-full bg-brandBlue hover:bg-brandBlue/80 text-white font-bold py-4 rounded-xl shadow-lg transition-all transform active:scale-[0.98]">
-            GRANT ACCESS
-        </button>
-        
-        <div class="pt-4 border-t border-gray-800">
-            <p class="text-[8px] text-gray-600 uppercase tracking-widest">BYD Engineering Intelligence Service | v2.0</p>
-        </div>
-    </div>
-</div>
-
-<!-- Main Application Wrapper -->
-<div id="app-content" class="hidden opacity-0 transition-opacity duration-1000">
-
-<div id="metadata" style="display:none;" aria-hidden="true">
-Summary of Plan: Introduction to cold-weather battery issues -> Electrical mechanism of Pulse Heating (Inverter/Motor) -> Physical and Chemical mechanisms (Joule heating, kinetics) -> Real-world performance charts. 
-Chart Choices: 
-1. Bar Chart (Goal: Compare) - Shows internal resistance drop across temperatures.
-2. Radar Chart (Goal: Compare/Evaluate) - Compares pulse heating vs external heating across physical/chemical metrics.
-3. Line Chart (Goal: Change over time) - Shows temperature increase rate. 
-4. Line Chart (Goal: Change over time) - Shows SOC charging curve at -20 degrees Celsius.
-Confirmation: Tabs added for Dashboard vs. Report.
-</div>
+<body class="antialiased">
 
 <nav class="sticky top-0 z-50 bg-brandBase/80 backdrop-blur-md border-b border-gray-800">
     <div class="max-w-7xl mx-auto px-4">
@@ -110,12 +68,16 @@ Confirmation: Tabs added for Dashboard vs. Report.
             <button onclick="switchTab('summary')" id="tab-btn-summary" class="px-4 py-2 rounded-full font-bold transition-all duration-300 text-gray-400 hover:text-white hover:bg-gray-800 text-sm md:text-base">
                 📝 요약 보고서
             </button>
-            <button onclick="switchTab('resources')" id="tab-btn-resources" class="px-4 py-2 rounded-full font-bold transition-all duration-300 text-gray-400 hover:text-white hover:bg-gray-800 text-sm md:text-base">
-                📚 기술관련자료
+            <button onclick="switchTab('deepdive')" id="tab-btn-deepdive" class="px-4 py-2 rounded-full font-bold transition-all duration-300 text-gray-400 hover:text-white hover:bg-gray-800 text-sm md:text-base">
+                📜 심층 분석 전문
             </button>
         </div>
     </div>
 </nav>
+
+<div id="metadata" style="display:none;" aria-hidden="true">
+Summary of Plan: Introduction to cold-weather battery issues -> Electrical mechanism of Pulse Heating (Inverter/Motor) -> Physical and Chemical mechanisms (Joule heating, kinetics) -> Real-world performance charts. 
+</div>
 
 <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <!-- DASHBOARD TAB CONTENT -->
@@ -155,7 +117,6 @@ Confirmation: Tabs added for Dashboard vs. Report.
             </div>
         </section>
 
-        <!-- NEW: ARCHITECTURAL DIAGRAM SECTION -->
         <section class="mb-16">
             <div class="flex items-center justify-between mb-8">
                 <h2 class="text-2xl font-bold text-white border-l-4 border-brandBlue pl-3">2. AB 분할 자가 가열 회로 아키텍처</h2>
@@ -164,7 +125,6 @@ Confirmation: Tabs added for Dashboard vs. Report.
             
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
                 <div class="lg:col-span-2 bg-brandSurface rounded-2xl p-8 shadow-xl border border-gray-700 relative overflow-hidden h-[350px]">
-                    <!-- Circuit Visualization (Stylized) -->
                     <div class="flex flex-col md:flex-row items-center justify-around space-y-8 md:space-y-0 h-full relative pt-10">
                         <div class="w-32 h-44 bg-gray-800 rounded-lg border-2 border-brandCyan flex flex-col items-center justify-center relative shadow-[0_0_20px_rgba(6,182,212,0.2)]">
                             <span class="text-brandCyan font-bold mb-2">Battery A</span>
@@ -190,7 +150,6 @@ Confirmation: Tabs added for Dashboard vs. Report.
                             <div class="absolute -left-4 top-1/2 w-4 h-[2px] bg-brandCyan"></div>
                         </div>
                         
-                        <!-- Connector to Motor -->
                         <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center">
                             <div class="w-[2px] h-8 bg-gray-600"></div>
                             <div class="w-40 h-20 bg-gray-800 rounded-xl border-2 border-brandBlue flex flex-col items-center justify-center">
@@ -225,7 +184,6 @@ Confirmation: Tabs added for Dashboard vs. Report.
                 </div>
             </div>
 
-            <!-- Operating Modes Grid -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
                 <div class="bg-brandBase/40 border border-gray-700 p-5 rounded-xl">
                     <span class="text-brandAmber font-mono text-xs mb-2 block uppercase">MODE I</span>
@@ -896,62 +854,5 @@ window.addEventListener('load', function() {
     });
 });
 </script>
-</div>
-
-<script>
-const VALID_CODE = "7345477";
-
-function verifyAuth() {
-    const input = document.getElementById('auth-code');
-    const gate = document.getElementById('password-gate');
-    const content = document.getElementById('app-content');
-    const error = document.getElementById('auth-error');
-
-    if (input.value === VALID_CODE) {
-        // Success
-        gate.classList.add('transition-all', 'duration-500', 'opacity-0', 'pointer-events-none');
-        content.classList.remove('hidden');
-        document.body.classList.remove('overflow-hidden');
-        setTimeout(() => {
-            content.classList.add('opacity-100');
-            content.classList.remove('opacity-0');
-            gate.remove(); // Clean up from DOM
-        }, 300);
-        
-        // Remember session for this tab
-        sessionStorage.setItem('authorized', 'true');
-    } else {
-        // Failure
-        error.classList.remove('hidden');
-        input.classList.add('border-red-500', 'shake');
-        input.value = '';
-        setTimeout(() => {
-            input.classList.remove('shake');
-        }, 500);
-    }
-}
-
-// Check session on load
-window.addEventListener('DOMContentLoaded', () => {
-    if (sessionStorage.getItem('authorized') === 'true') {
-        const gate = document.getElementById('password-gate');
-        const content = document.getElementById('app-content');
-        gate.remove();
-        content.classList.remove('hidden', 'opacity-0');
-        content.classList.add('opacity-100');
-        document.body.classList.remove('overflow-hidden');
-    }
-});
-</script>
-<style>
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-10px); }
-    75% { transform: translateX(10px); }
-}
-.shake {
-    animation: shake 0.2s ease-in-out 0s 2;
-}
-</style>
 </body>
 </html>

@@ -110,8 +110,8 @@ Confirmation: Tabs added for Dashboard vs. Report.
             <button onclick="switchTab('summary')" id="tab-btn-summary" class="px-4 py-2 rounded-full font-bold transition-all duration-300 text-gray-400 hover:text-white hover:bg-gray-800 text-sm md:text-base">
                 📝 요약 보고서
             </button>
-            <button onclick="switchTab('deepdive')" id="tab-btn-deepdive" class="px-4 py-2 rounded-full font-bold transition-all duration-300 text-gray-400 hover:text-white hover:bg-gray-800 text-sm md:text-base">
-                📜 심층 분석 전문
+            <button onclick="switchTab('resources')" id="tab-btn-resources" class="px-4 py-2 rounded-full font-bold transition-all duration-300 text-gray-400 hover:text-white hover:bg-gray-800 text-sm md:text-base">
+                📚 기술관련자료
             </button>
         </div>
     </div>
@@ -546,12 +546,119 @@ Confirmation: Tabs added for Dashboard vs. Report.
             <p style="text-align: center; margin-top: 5rem; color: #9ca3af; font-size: 0.875rem;">--- 보고서 끝 ---</p>
         </div>
     </div>
+
+    <!-- TECHNICAL RESOURCES TAB CONTENT -->
+    <div id="content-resources" class="hidden tab-content transition-opacity duration-500 opacity-0 bg-brandSurface rounded-3xl p-6 md:p-12 shadow-2xl border border-gray-700 max-w-5xl mx-auto">
+        <header class="mb-12 border-b border-gray-700 pb-6">
+            <h2 class="text-3xl font-black text-white">BYD 펄스 히팅 & 10C 충전 기술 리소스</h2>
+            <p class="text-gray-400 mt-2">공식 홈페이지, 특허 데이터베이스, 기술 기사 및 분석 영상 모음</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Official Sources -->
+            <div class="space-y-6">
+                <h3 class="text-xl font-bold text-brandCyan flex items-center">
+                    <span class="mr-2">🌐</span> 공식 및 뉴스 자료 (Official)
+                </h3>
+                <ul class="space-y-3">
+                    <li>
+                        <a href="https://www.byd.com/en/news" target="_blank" class="block p-4 glass rounded-xl border border-gray-600 hover:border-brandCyan hover:translate-x-1 transition-all group">
+                            <span class="text-sm font-bold text-white group-hover:text-brandCyan">BYD Global Newsroom</span>
+                            <p class="text-[10px] text-gray-500 mt-1">BYD의 최신 전동화 플랫폼 및 배터리 기술 공식 릴리스</p>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.byd.com/en/brand/technology/e-platform-3-0" target="_blank" class="block p-4 glass rounded-xl border border-gray-600 hover:border-brandCyan hover:translate-x-1 transition-all group">
+                            <span class="text-sm font-bold text-white group-hover:text-brandCyan">e-Platform 3.0 Technology Detail</span>
+                            <p class="text-[10px] text-gray-500 mt-1">8-in-1 파워트레인 및 초급속 충전 아키텍처 공식 소개 페이지</p>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Patents -->
+            <div class="space-y-6">
+                <h3 class="text-xl font-bold text-brandAmber flex items-center">
+                    <span class="mr-2">⚖️</span> 특허 및 학술 자료 (Patents)
+                </h3>
+                <ul class="space-y-3">
+                    <li>
+                        <a href="https://patents.google.com/?assignee=BYD&q=pulse+heating+battery" target="_blank" class="block p-4 glass rounded-xl border border-gray-600 hover:border-brandAmber hover:translate-x-1 transition-all group">
+                            <span class="text-sm font-bold text-white group-hover:text-brandAmber">Google Patents: BYD Pulse Heating</span>
+                            <p class="text-[10px] text-gray-500 mt-1">BYD 배터리 펄스 자가 가열 관련 전세계 특허 검색 실시간 데이터</p>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://worldwide.espacenet.com/searchResults?query=BYD+self-heating+battery" target="_blank" class="block p-4 glass rounded-xl border border-gray-600 hover:border-brandAmber hover:translate-x-1 transition-all group">
+                            <span class="text-sm font-bold text-white group-hover:text-brandAmber">Espacenet: Internal Resistance Heating</span>
+                            <p class="text-[10px] text-gray-500 mt-1">유럽 특허청(EPO) 배터리 내부 발열 제어 알고리즘 특허 DB</p>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Technical Articles -->
+            <div class="space-y-6">
+                <h3 class="text-xl font-bold text-brandBlue flex items-center">
+                    <span class="mr-2">📡</span> 심층 분석 및 기사 (Articles)
+                </h3>
+                <ul class="space-y-3">
+                    <li>
+                        <a href="https://cleantechnica.com/2024/05/20/byd-unveils-e-platform-3-0-evo/" target="_blank" class="block p-4 glass rounded-xl border border-gray-600 hover:border-brandBlue hover:translate-x-1 transition-all group">
+                            <span class="text-sm font-bold text-white group-hover:text-brandBlue">CleanTechnica: e-Platform 3.0 Evo Analysis</span>
+                            <p class="text-[10px] text-gray-500 mt-1">차세대 에볼루션 플랫폼의 펄스 히팅 및 듀얼 건 충전 기술 다각도 분석</p>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.vehiclethermal.com/latest-ev-battery-heating-technologies/" target="_blank" class="block p-4 glass rounded-xl border border-gray-600 hover:border-brandBlue hover:translate-x-1 transition-all group">
+                            <span class="text-sm font-bold text-white group-hover:text-brandBlue">Vehicle Thermal Management Analysis</span>
+                            <p class="text-[10px] text-gray-500 mt-1">전기차 배터리 가열 방식 트렌드: 외부 히터에서 내부 펄스 가열로의 전환</p>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://info.auto-motor-und-sport.de/byd-e-platform-3-0-evo-details/" target="_blank" class="block p-4 glass rounded-xl border border-gray-600 hover:border-brandBlue hover:translate-x-1 transition-all group">
+                            <span class="text-sm font-bold text-white group-hover:text-brandBlue">Auto Motor und Sport: SiC Tech Detail</span>
+                            <p class="text-[10px] text-gray-500 mt-1">1200V SiC 전력 모듈을 활용한 에너지 손실 절감 및 승온 가속화 분석</p>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Media/Video -->
+            <div class="space-y-6">
+                <h3 class="text-xl font-bold text-brandCyan flex items-center">
+                    <span class="mr-2">🎬</span> 미디어 및 영상 자료 (Media)
+                </h3>
+                <ul class="space-y-3">
+                    <li>
+                        <a href="https://www.youtube.com/results?search_query=BYD+Pulse+Heating+Technology" target="_blank" class="block p-4 glass rounded-xl border border-gray-600 hover:border-brandCyan hover:translate-x-1 transition-all group">
+                            <span class="text-sm font-bold text-white group-hover:text-brandCyan">YouTube: BYD Pulse Heating Reviews</span>
+                            <p class="text-[10px] text-gray-500 mt-1">실제 차주들의 혹한기 충전 속도 테스트 및 기술 시뮬레이션 영상</p>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.youtube.com/watch?v=S216WcM-b7Q" target="_blank" class="block p-4 glass rounded-xl border border-gray-600 hover:border-brandCyan hover:translate-x-1 transition-all group">
+                            <span class="text-sm font-bold text-white group-hover:text-brandCyan">Technical Explainer: e-Platform 3.0</span>
+                            <p class="text-[10px] text-gray-500 mt-1">인버터/모터 통합 유닛(8-in-1)의 고주파 스위칭 원리 영상 가이드</p>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="mt-16 p-8 glass rounded-2xl border border-gray-600 text-center">
+            <h4 class="text-white font-bold mb-2">원하시는 추가 자료가 있으신가요?</h4>
+            <p class="text-sm text-gray-500 mb-6">특정 특허 번호나 기업 분석 리포트가 필요하시면 말씀해 주세요.</p>
+            <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="px-6 py-2 bg-brandBase border border-gray-600 rounded-full text-xs text-gray-400 hover:text-white transition-colors">위로 이동</button>
+        </div>
+    </div>
 </main>
 
 <script>
 // Tab Switching Logic
+// Tab Switching Logic
 function switchTab(tabId) {
-    const tabs = ['dashboard', 'summary', 'deepdive'];
+    const tabs = ['dashboard', 'summary', 'deepdive', 'resources'];
     tabs.forEach(t => {
         const btn = document.getElementById(`tab-btn-${t}`);
         const content = document.getElementById(`content-${t}`);

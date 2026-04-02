@@ -8,22 +8,32 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 body {
-    background-color: #0f172a;
-    color: #e2e8f0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #020617;
+    color: #f1f5f9;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+.glass {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 .chart-container {
     position: relative;
     width: 100%;
-    max-width: 100%;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 auto;
     height: 350px;
-    max-height: 400px;
 }
 .diagram-box {
     background: linear-gradient(145deg, #1e293b, #0f172a);
-    box-shadow:  5px 5px 10px #0a0f1c, -5px -5px 10px #141f38;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 15px rgba(6, 182, 212, 0.2); }
+    50% { box-shadow: 0 0 30px rgba(6, 182, 212, 0.5); }
+}
+.animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
 }
 @media (min-width: 768px) {
     .chart-container {
@@ -90,13 +100,20 @@ Confirmation: Tabs added for Dashboard vs. Report.
         <section class="mb-16 bg-brandSurface rounded-2xl p-8 shadow-xl border border-gray-700">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                 <div>
-                    <h2 class="text-2xl font-bold text-white mb-4 border-l-4 border-brandCyan pl-3">1. 냉간 환경에서의 문제점: 왜 충전이 느려지는가?</h2>
+                    <h2 class="text-2xl font-bold text-white mb-4 border-l-4 border-brandCyan pl-3">1. 저온 환경의 물리화학적 한계</h2>
                     <p class="text-gray-300 mb-4 leading-relaxed">
-                        리튬이온 배터리는 영하의 온도에서 화학적 반응성이 급격히 떨어집니다. 전해액의 점도가 증가하여 리튬 이온의 이동성(Mobility)이 저하되고, 전하 전달 저항(Charge Transfer Resistance)이 기하급수적으로 상승합니다.
+                        영하 20°C 이하의 극저온에서는 리튬 이온의 확산 계수가 기하급수적으로 감소하며, 전극 표면에서의 전하 전달 저항(Charge Transfer Resistance)이 기하급수적으로 상승합니다. 이는 단순한 충전 속도 저하를 넘어, 음극 표면에 금속 리튬이 쌓이는 <strong>리튬 석출(Lithium Plating)</strong>을 유발하여 화재 및 배터리 수명 단축의 근본 원인이 됩니다.
                     </p>
-                    <p class="text-gray-300 leading-relaxed">
-                        특히 저온에서 고전류로 급속 충전을 시도할 경우, 리튬 이온이 흑연 음극층에 삽입(Intercalation)되지 못하고 표면에 금속 형태로 쌓이는 <strong>리튬 석출(Lithium Plating)</strong> 현상이 발생하여 배터리의 영구적 퇴화와 화재 위험을 초래합니다.
-                    </p>
+                    <div class="grid grid-cols-2 gap-4 mt-6">
+                        <div class="bg-brandBase/40 p-4 rounded-lg border border-gray-600">
+                            <span class="text-xs text-gray-500 uppercase block mb-1">전하 전달 저항</span>
+                            <span class="text-xl font-bold text-brandCyan">약 10배 증가</span>
+                        </div>
+                        <div class="bg-brandBase/40 p-4 rounded-lg border border-gray-600">
+                            <span class="text-xs text-gray-500 uppercase block mb-1">리튬 확산 속도</span>
+                            <span class="text-xl font-bold text-brandAmber">약 80% 감소</span>
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <div class="chart-container">
@@ -106,39 +123,171 @@ Confirmation: Tabs added for Dashboard vs. Report.
             </div>
         </section>
 
-        <section class="mb-16 bg-brandSurface rounded-2xl p-8 shadow-xl border border-gray-700">
-            <h2 class="text-2xl font-bold text-white mb-6 border-l-4 border-brandBlue pl-3">2. 핵심 기술: 전기·전자적 교류(AC) 펄스 발생 메커니즘</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div class="diagram-box p-6 rounded-xl border border-brandBlue text-center">
-                    <div class="text-3xl mb-2">🔋</div>
-                    <h3 class="font-bold text-lg mb-2">배터리 팩</h3>
-                    <p class="text-sm text-gray-400">고주파 교류 펄스를 수용하여 내부 저항에 의해 자체 발열.</p>
+        <!-- NEW: ARCHITECTURAL DIAGRAM SECTION -->
+        <section class="mb-16">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl font-bold text-white border-l-4 border-brandBlue pl-3">2. AB 분할 자가 가열 회로 아키텍처</h2>
+                <span class="px-3 py-1 bg-brandBlue/20 text-brandBlue text-xs font-bold rounded-full border border-brandBlue/30">PATENTED TOPOLOGY</span>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+                <div class="lg:col-span-2 bg-brandSurface rounded-2xl p-8 shadow-xl border border-gray-700 relative overflow-hidden h-[350px]">
+                    <!-- Circuit Visualization (Stylized) -->
+                    <div class="flex flex-col md:flex-row items-center justify-around space-y-8 md:space-y-0 h-full relative pt-10">
+                        <div class="w-32 h-44 bg-gray-800 rounded-lg border-2 border-brandCyan flex flex-col items-center justify-center relative shadow-[0_0_20px_rgba(6,182,212,0.2)]">
+                            <span class="text-brandCyan font-bold mb-2">Battery A</span>
+                            <div class="w-20 h-2 bg-gray-700 rounded-full overflow-hidden">
+                                <div class="w-1/2 h-full bg-brandCyan"></div>
+                            </div>
+                            <div class="absolute -right-4 top-1/2 w-4 h-[2px] bg-brandCyan"></div>
+                        </div>
+
+                        <div class="flex flex-col items-center">
+                            <div class="w-24 h-24 rounded-full border-4 border-dashed border-brandAmber flex items-center justify-center animate-[spin_15s_linear_infinite]">
+                                <span class="text-2xl text-brandAmber">⚡</span>
+                            </div>
+                            <span class="mt-4 text-brandAmber font-bold">SiC Inverter</span>
+                            <div class="text-[10px] text-gray-500 mt-1 uppercase tracking-tighter">High-Freq Switching</div>
+                        </div>
+
+                        <div class="w-32 h-44 bg-gray-800 rounded-lg border-2 border-brandCyan flex flex-col items-center justify-center relative shadow-[0_0_20px_rgba(6,182,212,0.2)]">
+                            <span class="text-brandCyan font-bold mb-2">Battery B</span>
+                            <div class="w-20 h-2 bg-gray-700 rounded-full overflow-hidden">
+                                <div class="w-1/2 h-full bg-brandCyan"></div>
+                            </div>
+                            <div class="absolute -left-4 top-1/2 w-4 h-[2px] bg-brandCyan"></div>
+                        </div>
+                        
+                        <!-- Connector to Motor -->
+                        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center">
+                            <div class="w-[2px] h-8 bg-gray-600"></div>
+                            <div class="w-40 h-20 bg-gray-800 rounded-xl border-2 border-brandBlue flex flex-col items-center justify-center">
+                                <span class="text-brandBlue font-bold">Drive Motor</span>
+                                <span class="text-[10px] text-gray-400">Neutral Point Inductor</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="diagram-box p-6 rounded-xl border border-brandAmber text-center">
-                    <div class="text-3xl mb-2">⚡</div>
-                    <h3 class="font-bold text-lg mb-2">SiC 인버터</h3>
-                    <p class="text-sm text-gray-400">초당 수천 번의 스위칭으로 DC를 AC 펄스로 변환.</p>
+
+                <div class="bg-brandSurface rounded-2xl p-8 shadow-xl border border-gray-700">
+                    <h3 class="text-lg font-bold text-white mb-6">Zero-Torque 제어 원리</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 rounded bg-brandBlue/10 flex items-center justify-center text-brandBlue mr-4 shrink-0 font-bold">I<sub>d</sub></div>
+                            <div>
+                                <h4 class="font-bold text-sm">직축 전류 (Direct Axis)</h4>
+                                <p class="text-xs text-gray-400 mt-1">에너지 저장 및 가열을 위한 펄스 전류 주입. 토크 발생 없음.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 rounded bg-red-400/10 flex items-center justify-center text-red-400 mr-4 shrink-0 font-bold">I<sub>q</sub></div>
+                            <div>
+                                <h4 class="font-bold text-sm">직교축 전류 (Quadrature)</h4>
+                                <p class="text-xs text-gray-400 mt-1">회전력 발생 방지를 위해 0.00A로 강제 제어.</p>
+                            </div>
+                        </div>
+                        <div class="mt-8 pt-6 border-t border-gray-700">
+                            <p class="text-sm text-gray-300 italic">"모터는 멈춰있지만, 내부는 수천 번의 펄스로 뜨겁게 가열됩니다."</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="diagram-box p-6 rounded-xl border border-brandCyan text-center">
-                    <div class="text-3xl mb-2">⚙️</div>
-                    <h3 class="font-bold text-lg mb-2">구동 모터 (인덕터)</h3>
-                    <p class="text-sm text-gray-400">에너지를 자기장으로 임시 저장했다가 배터리로 환류.</p>
+            </div>
+
+            <!-- Operating Modes Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
+                <div class="bg-brandBase/40 border border-gray-700 p-5 rounded-xl">
+                    <span class="text-brandAmber font-mono text-xs mb-2 block uppercase">MODE I</span>
+                    <h4 class="font-bold text-white text-sm mb-2">Battery A 방전</h4>
+                    <p class="text-[11px] text-gray-500">전류가 인덕터(모터)로 유입되어 자기 에너지로 저장.</p>
+                </div>
+                <div class="bg-brandBase/40 border border-gray-700 p-5 rounded-xl">
+                    <span class="text-brandAmber font-mono text-xs mb-2 block uppercase">MODE II</span>
+                    <h4 class="font-bold text-white text-sm mb-2">Dead-Time 환류</h4>
+                    <p class="text-[11px] text-gray-500">인버터 스위칭 전위 역전 및 전압 승압 발생.</p>
+                </div>
+                <div class="bg-brandBase/40 border border-gray-700 p-5 rounded-xl">
+                    <span class="text-brandAmber font-mono text-xs mb-2 block uppercase">MODE III</span>
+                    <h4 class="font-bold text-white text-sm mb-2">Battery B 충전</h4>
+                    <p class="text-[11px] text-gray-500">인덕터의 에너지가 B 그룹을 강하게 충전(가열).</p>
+                </div>
+                <div class="bg-brandBase/40 border border-gray-700 p-5 rounded-xl">
+                    <span class="text-brandAmber font-mono text-xs mb-2 block uppercase">MODE IV</span>
+                    <h4 class="font-bold text-white text-sm mb-2">Reverse Cycle</h4>
+                    <p class="text-[11px] text-gray-500">B방전 -> A충전으로 방향 전환하며 교류 펄스 완성.</p>
                 </div>
             </div>
         </section>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-            <div class="bg-brandSurface rounded-2xl p-8 shadow-xl border border-gray-700">
-                <div class="chart-container">
-                    <canvas id="radarChart"></canvas>
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold text-white mb-8 border-l-4 border-brandCyan pl-3">3. 가동 성능 벤치마크: PTC 대비 성능 우위</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-brandSurface rounded-2xl p-8 shadow-xl border border-gray-700">
+                    <h3 class="text-lg font-bold text-white mb-6 flex items-center">
+                        <span class="w-2 h-2 bg-brandAmber rounded-full mr-2"></span> 가열 속도 및 균일성 (Radar)
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-brandSurface rounded-2xl p-8 shadow-xl border border-gray-700">
+                    <h3 class="text-lg font-bold text-white mb-6 flex items-center">
+                        <span class="w-2 h-2 bg-brandCyan rounded-full mr-2"></span> 승온 시너지 효과
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="tempRiseChart"></canvas>
+                    </div>
+                </div>
+                <div class="md:col-span-2 bg-brandSurface rounded-2xl p-8 shadow-xl border border-gray-700">
+                    <h3 class="text-lg font-bold text-white mb-6 flex items-center">
+                        <span class="w-2 h-2 bg-brandBlue rounded-full mr-2"></span> 충전 곡선 데이터 (-20°C Test)
+                    </h3>
+                    <div class="chart-container h-[400px]">
+                        <canvas id="chargingCurveChart"></canvas>
+                    </div>
+        <section class="mb-16">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl font-bold text-white border-l-4 border-brandBlue pl-3">4. 화학적 돌파구: 리튬 석출 능동 제어</h2>
+                <span class="px-3 py-1 bg-brandAmber/20 text-brandAmber text-[10px] font-bold rounded-full border border-brandAmber/30">ADVANCED ELECTROCHEMISTRY</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="glass rounded-2xl p-8 border border-gray-700">
+                    <h3 class="text-lg font-bold text-brandCyan mb-4 flex items-center">
+                        <span class="w-8 h-8 rounded-lg bg-brandCyan/10 flex items-center justify-center mr-3 text-sm">🔄</span>
+                        가역적 스트리핑 (Reversible Stripping)
+                    </h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                        충전 초기 단계에서 형성될 수 있는 미세한 리튬 입자들을 고주파 방전 펄스로 즉각 '스트리핑'하여 다시 이온 상태로 되돌립니다. 이는 덴드라이트 성장을 물리적으로 억제하는 핵심 기작입니다.
+                    </p>
+                    <div class="flex justify-between items-center bg-brandBase/40 p-4 rounded-xl border border-gray-600">
+                        <div class="text-center px-4">
+                            <span class="text-[10px] text-gray-400 block uppercase mb-1">Lithium Plating</span>
+                            <span class="text-brandCyan font-bold">Charge (+)</span>
+                        </div>
+                        <div class="text-2xl text-gray-700 mx-2">⇄</div>
+                        <div class="text-center px-4">
+                            <span class="text-[10px] text-gray-400 block uppercase mb-1">Stripping</span>
+                            <span class="text-brandAmber font-bold">Discharge (-)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass rounded-2xl p-8 border border-gray-700">
+                    <h3 class="text-lg font-bold text-brandAmber mb-4 flex items-center">
+                        <span class="w-8 h-8 rounded-lg bg-brandAmber/10 flex items-center justify-center mr-3 text-sm">〽️</span>
+                        위상 적응형 동적 제어
+                    </h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                        배터리 계면의 전압-전류 위상차를 실시간으로 감지하여 주파수를 80Hz에서 최대 500Hz까지 동적으로 가변합니다. 시스템 공진을 회피하면서 가열 효율을 극대화하는 지능형 알고리즘입니다.
+                    </p>
+                    <div class="h-20 flex items-end justify-center space-x-2 pb-2">
+                        <div class="w-2 h-8 bg-brandAmber/40 rounded-full animate-bounce" style="animation-duration: 1.5s"></div>
+                        <div class="w-2 h-14 bg-brandAmber/60 rounded-full animate-bounce" style="animation-duration: 2s"></div>
+                        <div class="w-2 h-20 bg-brandAmber rounded-full animate-bounce" style="animation-duration: 1.2s"></div>
+                        <div class="w-2 h-14 bg-brandAmber/60 rounded-full animate-bounce" style="animation-duration: 2.2s"></div>
+                        <div class="w-2 h-8 bg-brandAmber/40 rounded-full animate-bounce" style="animation-duration: 1.8s"></div>
+                    </div>
                 </div>
             </div>
-            <div class="bg-brandSurface rounded-2xl p-8 shadow-xl border border-gray-700">
-                <div class="chart-container">
-                    <canvas id="tempRiseChart"></canvas>
-                </div>
-            </div>
-        </div>
+        </section>
     </div>
 
     <!-- SUMMARY TAB CONTENT -->
@@ -146,79 +295,56 @@ Confirmation: Tabs added for Dashboard vs. Report.
         <article class="prose prose-invert max-w-none">
             <header class="border-b border-gray-600 pb-8 mb-12 text-center">
                 <span class="text-brandCyan font-mono text-sm tracking-widest uppercase mb-2 block">Executive Summary</span>
-                <h1 class="text-3xl md:text-5xl font-black text-white leading-tight mb-4">
-                    BYD 펄스 히팅 기술 요약 보고서
+                <h1 class="text-3xl md:text-5xl font-black text-white leading-tight mb-4 tracking-tighter">
+                    BYD 펄스 히팅 & 10C 메가와트 충전<br/><span class="text-brandBlue italic">핵심 요약 리포트</span>
                 </h1>
-                <p class="text-gray-400 text-lg">핵심 메커니즘 및 주요 성능 성과 요약</p>
             </header>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-                <div class="bg-brandBase/50 p-8 rounded-2xl border border-gray-700">
-                    <h2 class="text-xl font-bold text-brandBlue mb-4 flex items-center">
-                        <span class="bg-brandBlue/20 p-2 rounded-lg mr-3">🚀</span> 기술 개요
-                    </h2>
-                    <p class="text-gray-300 leading-relaxed">
-                        기존 외부 가열(PTC) 방식의 한계를 극복하기 위해 차량의 <strong>8-in-1 파워트레인</strong>을 활용, 배터리 내부에서 직접 열을 발생시키는 <strong>지능형 펄스 자가 가열</strong> 기술입니다.
-                    </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div class="bg-brandBase/40 p-6 rounded-2xl border border-gray-700 text-center">
+                    <div class="w-12 h-12 bg-brandCyan/10 rounded-full flex items-center justify-center mx-auto mb-4 text-brandCyan text-2xl">⚡</div>
+                    <h3 class="font-bold text-white text-lg">최대 10C</h3>
+                    <p class="text-[10px] text-gray-500 mt-2">1,000V / 1,000A 출력 대응 메가와트급 충전 설계</p>
                 </div>
-                <div class="bg-brandBase/50 p-8 rounded-2xl border border-gray-700">
-                    <h2 class="text-xl font-bold text-brandCyan mb-4 flex items-center">
-                        <span class="bg-brandCyan/20 p-2 rounded-lg mr-3">⚡</span> 전력 제어
-                    </h2>
-                    <p class="text-gray-300 leading-relaxed">
-                        SiC 인버터와 모터 권선을 인덕터로 활용하여 고주파 AC 펄스를 생성합니다. <strong>Zero-Torque 제어</strong> 기술로 모터 구동 없이 배터리만 안전하게 가열합니다.
-                    </p>
+                <div class="bg-brandBase/40 p-6 rounded-2xl border border-gray-700 text-center">
+                    <div class="w-12 h-12 bg-brandBlue/10 rounded-full flex items-center justify-center mx-auto mb-4 text-brandBlue text-2xl">🔥</div>
+                    <h3 class="font-bold text-white text-lg">4K/min</h3>
+                    <p class="text-[10px] text-gray-500 mt-2">외부 보조 히터 없이 배터리 내부 줄 히팅만으로 승온</p>
                 </div>
-            </div>
-
-            <div class="space-y-8 mb-12">
-                <h2 class="text-2xl font-bold text-white border-l-4 border-brandAmber pl-4">주요 혁신 포인트</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="bg-gray-800/50 p-6 rounded-xl">
-                        <h3 class="font-bold text-brandAmber mb-2">초고속 가열</h3>
-                        <p class="text-sm text-gray-400">분당 최대 4~5K의 온도를 상승시켜 극한 저온(-35°C)에서도 수 분 내 정상 성능 확보.</p>
-                    </div>
-                    <div class="bg-gray-800/50 p-6 rounded-xl">
-                        <h3 class="font-bold text-brandAmber mb-2">리튬 석출 방지</h3>
-                        <p class="text-sm text-gray-400">가역적 스트리핑 메커니즘을 통해 충전 시 덴드라이트 성장을 화학적으로 억제.</p>
-                    </div>
-                    <div class="bg-gray-800/50 p-6 rounded-xl">
-                        <h3 class="font-bold text-brandAmber mb-2">메가와트 충전</h3>
-                        <p class="text-sm text-gray-400">10C(1000V/1000A)급 출력을 수용하여 5분 충전으로 400km 주행 가능.</p>
-                    </div>
+                <div class="bg-brandBase/40 p-6 rounded-2xl border border-gray-700 text-center">
+                    <div class="w-12 h-12 bg-brandAmber/10 rounded-full flex items-center justify-center mx-auto mb-4 text-brandAmber text-2xl">🛡️</div>
+                    <h3 class="font-bold text-white text-lg">LPlating 억제</h3>
+                    <p class="text-[10px] text-gray-500 mt-2">고주파 교환 충방전 사이클로 화학적 석출 원천 차단</p>
                 </div>
             </div>
 
-            <div class="bg-gradient-to-br from-brandBlue/10 to-brandCyan/10 p-8 rounded-3xl border border-brandBlue/20 mb-12">
-                <h2 class="text-2xl font-bold text-white mb-6">성능 비교 (Benchmark)</h2>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm">
-                        <thead>
-                            <tr class="text-gray-400 border-b border-gray-700">
-                                <th class="py-3 text-left">항목</th>
-                                <th class="py-3 text-left">기존 방식 (PTC)</th>
-                                <th class="py-3 text-left text-brandCyan">BYD 펄스 히팅</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-800">
-                            <tr>
-                                <td class="py-4 font-medium">가열 방식</td>
-                                <td class="py-4">외부 전열 (전도식)</td>
-                                <td class="py-4 text-brandCyan">내부 줄 히팅 (체적식)</td>
-                            </tr>
-                            <tr>
-                                <td class="py-4 font-medium">가열 속도</td>
-                                <td class="py-4">느림 (~0.5K/min)</td>
-                                <td class="py-4 text-brandCyan">매우 빠름 (~4.5K/min)</td>
-                            </tr>
-                            <tr>
-                                <td class="py-4 font-medium">안전성</td>
-                                <td class="py-4">온도 불균형 위험</td>
-                                <td class="py-4 text-brandCyan">균일 가열 및 석출 억제</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="space-y-12 mb-12">
+                <section>
+                    <h2 class="text-2xl font-bold text-white border-l-4 border-brandBlue pl-4 mb-6">주요 기술 혁신 (Technological Breakthroughs)</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-bold text-brandCyan flex items-center"><span class="mr-2">🔬</span> 하드웨어: Blade Battery 2.0</h3>
+                            <ul class="text-sm text-gray-400 space-y-2 list-none p-0">
+                                <li class="flex items-start"><span class="text-brandCyan mr-2">▶</span> <span><strong>LMFP Core-Shell:</strong> 철 함량 LFP 층으로 Core를 감싸 고속 충전 안정성 확보</span></li>
+                                <li class="flex items-start"><span class="text-brandCyan mr-2">▶</span> <span><strong>3D Dual-Lane Cooling:</strong> 배터리 상하부 직접 냉각으로 메가와트급 열 실시간 상쇄</span></li>
+                            </ul>
+                        </div>
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-bold text-brandAmber flex items-center"><span class="mr-2">🧩</span> 소프트웨어: 동적 주파수 제어</h3>
+                            <ul class="text-sm text-gray-400 space-y-2 list-none p-0">
+                                <li class="flex items-start"><span class="text-brandAmber mr-2">▶</span> <span><strong>Phase Adaptive Control:</strong> 전압-전류 위상차 모니터링 및 실시간 임피던스 최적화</span></li>
+                                <li class="flex items-start"><span class="text-brandAmber mr-2">▶</span> <span><strong>Zero-Torque Control:</strong> 구동력 발생 없는 직축(d-axis) 전류 제어 기술 적용</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="bg-gradient-to-r from-brandBlue/10 to-transparent p-8 rounded-2xl border-l-2 border-brandBlue">
+                    <h3 class="text-xl font-bold text-white mb-4 italic">"5분 충전으로 400km 주행"</h3>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        단순히 전류를 높이는 것이 아니라, <strong>배터리 내부 저항을 가열 에너지로 역이용</strong>하여 충전 준비 시간을 단축하고, <strong>가역적 스트리핑(Reversible Stripping)</strong> 메커니즘을 통해 리튬 석출의 물리적 한계를 돌파한 결과입니다.
+                    </p>
+                </section>
             </div>
 
             <footer class="mt-16 pt-8 border-t border-gray-700 text-center text-gray-500 font-mono text-xs italic">

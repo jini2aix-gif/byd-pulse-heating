@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BYD 펄스 히팅 기술: 상세 엔지니어링 분석</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body {
+    background-color: #0f172a;
+    color: #e2e8f0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.chart-container {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    height: 350px;
+    max-height: 400px;
+}
+.diagram-box {
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+    box-shadow:  5px 5px 10px #0a0f1c, -5px -5px 10px #141f38;
+}
+@media (min-width: 768px) {
+    .chart-container {
+        height: 400px;
+    }
+}
+</style>
+<script>
+tailwind.config = {
+    theme: {
+        extend: {
+            colors: {
+                brandBase: '#0f172a',
+                brandSurface: '#1e293b',
+                brandBlue: '#3b82f6',
+                brandCyan: '#06b6d4',
+                brandAmber: '#f59e0b'
+            }
+        }
+    }
+}
+</script>
+</head>
+<body class="antialiased">
+
+<div id="metadata" style="display:none;" aria-hidden="true">
+Summary of Plan: Introduction to cold-weather battery issues -> Electrical mechanism of Pulse Heating (Inverter/Motor) -> Physical and Chemical mechanisms (Joule heating, kinetics) -> Real-world performance charts. 
+Chart Choices: 
+1. Bar Chart (Goal: Compare) - Shows internal resistance drop across temperatures.
+2. Radar Chart (Goal: Compare/Evaluate) - Compares pulse heating vs external heating across physical/chemical metrics.
+3. Line Chart (Goal: Change over time) - Shows temperature increase rate. 
+4. Line Chart (Goal: Change over time) - Shows SOC charging curve at -20 degrees Celsius.
+Confirmation: Tabs added for Dashboard vs. Report.
+</div>
+
+<nav class="sticky top-0 z-50 bg-brandBase/80 backdrop-blur-md border-b border-gray-800">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex justify-center space-x-4 md:space-x-8 h-16 items-center">
+            <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="px-4 py-2 rounded-full font-bold transition-all duration-300 bg-brandBlue text-white shadow-lg shadow-brandBlue/20 text-sm md:text-base">
+                📊 기술 대시보드
+            </button>
+            <button onclick="switchTab('summary')" id="tab-btn-summary" class="px-4 py-2 rounded-full font-bold transition-all duration-300 text-gray-400 hover:text-white hover:bg-gray-800 text-sm md:text-base">
+                📝 요약 보고서
+            </button>
+            <button onclick="switchTab('deepdive')" id="tab-btn-deepdive" class="px-4 py-2 rounded-full font-bold transition-all duration-300 text-gray-400 hover:text-white hover:bg-gray-800 text-sm md:text-base">
+                📜 심층 분석 전문
+            </button>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- DASHBOARD TAB CONTENT -->
+    <div id="content-dashboard" class="tab-content transition-opacity duration-500">
+        <header class="text-center mb-16">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brandCyan to-brandBlue mb-4">
+                BYD 펄스 히팅(Pulse Heating) 기술
+            </h1>
+            <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                혹한기 전기차 충전 속도 저하를 극복하기 위한 전기전자, 물리, 화학적 핵심 메커니즘 상세 분석
+            </p>
+        </header>
+
+        <section class="mb-16 bg-brandSurface rounded-2xl p-8 shadow-xl border border-gray-700">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-4 border-l-4 border-brandCyan pl-3">1. 냉간 환경에서의 문제점: 왜 충전이 느려지는가?</h2>
+                    <p class="text-gray-300 mb-4 leading-relaxed">
+                        리튬이온 배터리는 영하의 온도에서 화학적 반응성이 급격히 떨어집니다. 전해액의 점도가 증가하여 리튬 이온의 이동성(Mobility)이 저하되고, 전하 전달 저항(Charge Transfer Resistance)이 기하급수적으로 상승합니다.
+                    </p>
+                    <p class="text-gray-300 leading-relaxed">
+                        특히 저온에서 고전류로 급속 충전을 시도할 경우, 리튬 이온이 흑연 음극층에 삽입(Intercalation)되지 못하고 표면에 금속 형태로 쌓이는 <strong>리튬 석출(Lithium Plating)</strong> 현상이 발생하여 배터리의 영구적 퇴화와 화재 위험을 초래합니다.
+                    </p>
+                </div>
+                <div>
+                    <div class="chart-container">
+                        <canvas id="resistanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16 bg-brandSurface rounded-2xl p-8 shadow-xl border border-gray-700">
+            <h2 class="text-2xl font-bold text-white mb-6 border-l-4 border-brandBlue pl-3">2. 핵심 기술: 전기·전자적 교류(AC) 펄스 발생 메커니즘</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="diagram-box p-6 rounded-xl border border-brandBlue text-center">
+                    <div class="text-3xl mb-2">🔋</div>
+                    <h3 class="font-bold text-lg mb-2">배터리 팩</h3>
+                    <p class="text-sm text-gray-400">고주파 교류 펄스를 수용하여 내부 저항에 의해 자체 발열.</p>
+                </div>
+                <div class="diagram-box p-6 rounded-xl border border-brandAmber text-center">
+                    <div class="text-3xl mb-2">⚡</div>
+                    <h3 class="font-bold text-lg mb-2">SiC 인버터</h3>
+                    <p class="text-sm text-gray-400">초당 수천 번의 스위칭으로 DC를 AC 펄스로 변환.</p>
+                </div>
+                <div class="diagram-box p-6 rounded-xl border border-brandCyan text-center">
+                    <div class="text-3xl mb-2">⚙️</div>
+                    <h3 class="font-bold text-lg mb-2">구동 모터 (인덕터)</h3>
+                    <p class="text-sm text-gray-400">에너지를 자기장으로 임시 저장했다가 배터리로 환류.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+            <div class="bg-brandSurface rounded-2xl p-8 shadow-xl border border-gray-700">
+                <div class="chart-container">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+            <div class="bg-brandSurface rounded-2xl p-8 shadow-xl border border-gray-700">
+                <div class="chart-container">
+                    <canvas id="tempRiseChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUMMARY TAB CONTENT -->
+    <div id="content-summary" class="hidden tab-content transition-opacity duration-500 opacity-0 bg-brandSurface rounded-3xl p-6 md:p-12 shadow-2xl border border-gray-700 max-w-5xl mx-auto">
+        <article class="prose prose-invert max-w-none">
+            <header class="border-b border-gray-600 pb-8 mb-12 text-center">
+                <span class="text-brandCyan font-mono text-sm tracking-widest uppercase mb-2 block">Executive Summary</span>
+                <h1 class="text-3xl md:text-5xl font-black text-white leading-tight mb-4">
+                    BYD 펄스 히팅 기술 요약 보고서
+                </h1>
+                <p class="text-gray-400 text-lg">핵심 메커니즘 및 주요 성능 성과 요약</p>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                <div class="bg-brandBase/50 p-8 rounded-2xl border border-gray-700">
+                    <h2 class="text-xl font-bold text-brandBlue mb-4 flex items-center">
+                        <span class="bg-brandBlue/20 p-2 rounded-lg mr-3">🚀</span> 기술 개요
+                    </h2>
+                    <p class="text-gray-300 leading-relaxed">
+                        기존 외부 가열(PTC) 방식의 한계를 극복하기 위해 차량의 <strong>8-in-1 파워트레인</strong>을 활용, 배터리 내부에서 직접 열을 발생시키는 <strong>지능형 펄스 자가 가열</strong> 기술입니다.
+                    </p>
+                </div>
+                <div class="bg-brandBase/50 p-8 rounded-2xl border border-gray-700">
+                    <h2 class="text-xl font-bold text-brandCyan mb-4 flex items-center">
+                        <span class="bg-brandCyan/20 p-2 rounded-lg mr-3">⚡</span> 전력 제어
+                    </h2>
+                    <p class="text-gray-300 leading-relaxed">
+                        SiC 인버터와 모터 권선을 인덕터로 활용하여 고주파 AC 펄스를 생성합니다. <strong>Zero-Torque 제어</strong> 기술로 모터 구동 없이 배터리만 안전하게 가열합니다.
+                    </p>
+                </div>
+            </div>
+
+            <div class="space-y-8 mb-12">
+                <h2 class="text-2xl font-bold text-white border-l-4 border-brandAmber pl-4">주요 혁신 포인트</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-gray-800/50 p-6 rounded-xl">
+                        <h3 class="font-bold text-brandAmber mb-2">초고속 가열</h3>
+                        <p class="text-sm text-gray-400">분당 최대 4~5K의 온도를 상승시켜 극한 저온(-35°C)에서도 수 분 내 정상 성능 확보.</p>
+                    </div>
+                    <div class="bg-gray-800/50 p-6 rounded-xl">
+                        <h3 class="font-bold text-brandAmber mb-2">리튬 석출 방지</h3>
+                        <p class="text-sm text-gray-400">가역적 스트리핑 메커니즘을 통해 충전 시 덴드라이트 성장을 화학적으로 억제.</p>
+                    </div>
+                    <div class="bg-gray-800/50 p-6 rounded-xl">
+                        <h3 class="font-bold text-brandAmber mb-2">메가와트 충전</h3>
+                        <p class="text-sm text-gray-400">10C(1000V/1000A)급 출력을 수용하여 5분 충전으로 400km 주행 가능.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-brandBlue/10 to-brandCyan/10 p-8 rounded-3xl border border-brandBlue/20 mb-12">
+                <h2 class="text-2xl font-bold text-white mb-6">성능 비교 (Benchmark)</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="text-gray-400 border-b border-gray-700">
+                                <th class="py-3 text-left">항목</th>
+                                <th class="py-3 text-left">기존 방식 (PTC)</th>
+                                <th class="py-3 text-left text-brandCyan">BYD 펄스 히팅</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-800">
+                            <tr>
+                                <td class="py-4 font-medium">가열 방식</td>
+                                <td class="py-4">외부 전열 (전도식)</td>
+                                <td class="py-4 text-brandCyan">내부 줄 히팅 (체적식)</td>
+                            </tr>
+                            <tr>
+                                <td class="py-4 font-medium">가열 속도</td>
+                                <td class="py-4">느림 (~0.5K/min)</td>
+                                <td class="py-4 text-brandCyan">매우 빠름 (~4.5K/min)</td>
+                            </tr>
+                            <tr>
+                                <td class="py-4 font-medium">안전성</td>
+                                <td class="py-4">온도 불균형 위험</td>
+                                <td class="py-4 text-brandCyan">균일 가열 및 석출 억제</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <footer class="mt-16 pt-8 border-t border-gray-700 text-center text-gray-500 font-mono text-xs italic">
+                © BYD Engineering Summary Report
+            </footer>
+        </article>
+    </div>
+
+    <!-- DEEP DIVE TAB CONTENT -->
+    <div id="content-deepdive" class="hidden tab-content transition-opacity duration-500 opacity-0 bg-white text-gray-900 rounded-3xl shadow-2xl overflow-hidden max-w-5xl mx-auto">
+        <div class="bg-gray-100 px-8 py-4 border-b flex justify-between items-center text-gray-500 text-sm font-medium">
+            <span>BYD_Technical_Whitepaper_Full.pdf</span>
+            <div class="flex space-x-2">
+                <span class="w-3 h-3 rounded-full bg-red-400"></span>
+                <span class="w-3 h-3 rounded-full bg-yellow-400"></span>
+                <span class="w-3 h-3 rounded-full bg-green-400"></span>
+            </div>
+        </div>
+        <div class="h-[80vh] overflow-y-auto px-8 md:px-16 py-12 doc-reader leading-relaxed custom-scrollbar bg-white">
+            <style>
+                .doc-reader h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 2rem; line-height: 1.2; color: #111827; }
+                .doc-reader h2 { font-size: 1.75rem; font-weight: 700; margin-top: 3rem; margin-bottom: 1.5rem; color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; }
+                .doc-reader h3 { font-size: 1.25rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; color: #374151; }
+                .doc-reader p { margin-bottom: 1.25rem; color: #4b5563; font-size: 1.1rem; }
+                .doc-reader .tech-table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.95rem; }
+                .doc-reader .tech-table th { background: #f9fafb; border: 1px solid #e5e7eb; padding: 1rem; text-align: left; font-weight: 700; color: #111827; }
+                .doc-reader .tech-table td { border: 1px solid #e5e7eb; padding: 1rem; color: #374151; vertical-align: top; }
+                .doc-reader .formula { background: #f3f4f6; padding: 1.5rem; border-radius: 0.75rem; font-family: "Courier New", Courier, monospace; text-align: center; margin: 2rem 0; font-weight: 600; font-size: 1.2rem; }
+                .doc-reader strong { color: #111827; }
+                .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+            </style>
+            
+            <h1>BYD 펄스 히팅(Pulse Heating) 기술 및 10C 메가와트 초급속 충전의 전주기 공학적 메커니즘 심층 분석 보고서</h1>
+
+            <h2>1. 서론: 전기차 저온 환경 충전의 물리화학적 한계와 열 관리 패러다임의 진화</h2>
+            <p>전기자동차(EV) 산업의 기하급수적인 성장 이면에는 극한 환경, 특히 영하의 저온 환경에서 발생하는 리튬이온 배터리의 치명적인 성능 저하라는 공학적 난제가 자리 잡고 있다. 물리화학적 관점에서 리튬이온 배터리가 253.15 K(-20°C) 이하의 저온에 노출될 경우, 전해액의 점도가 급격히 상승하고 고체 리튬의 확산 계수가 기하급수적으로 감소하며 전극 표면에서의 전하 전달 저항(Charge Transfer Resistance)이 극단적으로 증가하게 된다. 이러한 배터리 내부 임피던스의 극단적인 상승은 단순한 가용 용량의 급감을 넘어, 고속 충전 시 리튬 이온이 흑연 음극 층간으로 정상적으로 삽입(Intercalation)되지 못하고 음극 표면에 금속 형태로 환원되어 축적되는 리튬 석출(Lithium Plating) 현상을 직접적으로 유발한다.</p>
+            <p>전통적인 전기자동차의 열 관리 시스템은 배터리 팩 외벽에 부착된 PTC(Positive Temperature Coefficient) 히터나 외부 액랭 및 온수 순환 회로를 이용하여 배터리를 외부에서 가열하는 방식(External Heating)에 의존해 왔다. 그러나 이러한 외부 가열 방식은 열이 배터리의 외장재를 거쳐 내부 중심부까지 전도되는 경로가 길어 가열 속도가 현저히 느리며, 배터리 팩의 모서리와 중심부 간에 극심한 온도 불균형을 초래한다. 이는 결국 특정 셀의 국부적인 열화(Degradation)를 가속화하고 시스템의 부피와 에너지 소비를 가중시키는 결과를 낳는다.</p>
+            <p>이러한 한계를 극복하기 위해 BYD는 자사의 차세대 전기차 전용 아키텍처인 'e-Platform 3.0' 및 'e-Platform 3.0 Evo'에 세계 최초로 차량의 기존 구동계를 발열체로 역이용하는 '지능형 펄스 자가 가열(Intelligent Pulse Self-Heating)' 기술을 독자적으로 도입하였다. 이 기술은 외부의 물리적 열원 없이 인버터와 구동 모터의 인덕턴스 특성을 활용하여 배터리 셀 내부에서 직접 줄 히팅(Joule Heating)을 발생시키는 혁신적인 내부 가열(Internal Heating) 토폴로지이다. 본 보고서는 BYD가 어떠한 방식으로 고주파 교류(AC) 스위칭 제어를 통해 충전 속도를 획기적으로 끌어올렸는지, 그리고 그 이면에 존재하는 전기전자적 제어 회로, 물리적 열역학, 그리고 화학적 리튬 석출 억제 메커니즘을 관련 특허와 학술 문헌을 바탕으로 심층 분석한다.</p>
+
+            <h2>2. e-Platform 3.0 및 8-in-1 파워트레인 하드웨어 통합 아키텍처</h2>
+            <p>BYD의 펄스 히팅 기술이 추가적인 고비용의 전용 승강압 회로나 부피가 큰 외부 히터 없이 구현될 수 있었던 근본적인 배경은 800V 및 1000V 고전압 탄화규소(SiC) 아키텍처를 기반으로 한 초고도화된 파워트레인 하드웨어 통합 설계에 있다.</p>
+            
+            <h3>2.1. 8-in-1 전동화 파워트레인 설계 및 제어 도메인 통합</h3>
+            <p>e-Platform 3.0은 전동화 차량의 핵심 컴포넌트들을 물리적, 논리적으로 하나의 단일 모듈로 결합한 세계 최초의 '8-in-1 파워트레인' 아키텍처를 채택하였다. 이 고도화된 모듈은 전기자동차의 구동과 충방전, 그리고 전력 분배를 책임지는 8개의 독립된 시스템을 융합한 결과물이다.</p>
+
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th>통합 컴포넌트</th>
+                        <th>공학적 기능 및 아키텍처 통합의 이점</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>구동 모터 (Drive Motor) 및 감속기 (Transmission)</strong></td>
+                        <td>최고 30,511 RPM으로 회전 가능한 초고속 모터를 적용하여 체적 및 중량을 대폭 감축하면서도 전력 밀도를 극대화함. 모터의 3상 고정자 권선은 펄스 히팅 과정에서 필수적인 에너지 저장 인덕터로 작동함.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>모터 제어기 (Motor Controller, Inverter)</strong></td>
+                        <td>최대 1500V 정격의 차량용 SiC 전력 반도체 칩을 적용하여 스위칭 주파수를 극대화하고 전도 및 변환 손실을 최소화함. 배터리 가열을 위한 고주파 AC 파형을 생성하는 주체임.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>차량 제어 장치 (VCU) 및 배터리 관리 시스템 (BMS)</strong></td>
+                        <td>분산된 마이크로컨트롤러를 단일 도메인 컨트롤러(Power Domain Controller) 보드에 통합하여 배터리의 전류, 전압, 온도 데이터를 100Hz 이상의 초고속으로 실시간 샘플링 및 피드백 제어함.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>고전압 배전 장치 (PDU), 직류 변환 장치 (DC-DC), 탑재형 충전기 (OBC)</strong></td>
+                        <td>배터리와 모터 사이의 전력 인터페이스를 최단 거리로 구성하여 케이블링에 의한 인덕턴스 및 저항 손실을 제거, 전체 파워트레인의 시스템 효율을 최고 89%까지 상승시킴.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p>이러한 도메인 컨트롤러(Domain Controller) 기반의 E/E(Electrical/Electronic) 아키텍처 통합은 BMS가 배터리의 미세한 분극 저항 변화와 온도 편차를 밀리초(ms) 단위로 감지하고, 모터 제어기(인버터)가 이에 맞춰 수백 헤르츠(Hz) 이상의 스위칭 동작을 지연 없이 수행하도록 완벽한 동기화를 제공한다. 구동계를 동력 전달 장치에서 '전기화학적 가열 조절기'로 전환하는 제어의 근간이 바로 이 고도로 통합된 아키텍처에서 비롯된다.</p>
+
+            <h2>3. 펄스 히팅(Pulse Heating)의 전기 및 전자 회로 메커니즘</h2>
+            <p>BYD의 내부 펄스 히팅은 차량의 기존 자원을 최대한 재활용하는 방식으로 설계되었다. 배터리 자신의 내부 저항(Ohmic Resistance)을 주된 열원으로 사용하기 위해서는 고주파의 강력한 교류(AC) 전류가 배터리를 관통해야 한다. 이를 위해 3상 인버터의 SiC 전력 스위칭 소자와 구동 모터의 3상 고정자 권선(Stator Winding)을 벅-부스트(Buck-Boost) 초퍼 회로의 핵심 부품인 인덕터(Inductor)로 전용하는 토폴로지가 고안되었다.</p>
+
+            <h3>3.1. 인버터-모터-배터리 기반의 AB 분할 자가 가열 폐회로</h3>
+            <p>BYD가 출원한 특허 명세서에 나타난 전기 회로적 메커니즘에 따르면, 이 폐회로는 배터리 팩을 전동력이 서로 다른 두 개의 하위 그룹으로 논리적 또는 물리적으로 분할하는 데서 출발한다. 이를 제1 배터리 셀 그룹(Battery Group A)과 제2 배터리 셀 그룹(Battery Group B)으로 칭하며, 직렬로 연결된 팩 내부에서 상대적인 전위차를 형성하도록 구성한다.</p>
+            <ul>
+                <li><strong>브리지 암 연결:</strong> 배터리의 최상단 양극(Positive Electrode)과 최하단 음극(Negative Electrode)은 3상 인버터의 상단 브리지 암(Upper Bridge Arms)과 하단 브리지 암(Lower Bridge Arms)에 각각 병렬로 연결된다.</li>
+                <li><strong>모터 권선 및 중성점 결속:</strong> 인버터의 각 브리지 암의 중간점(Midpoints)은 모터의 3상 코일(U, V, W 상)의 헤드 엔드(Head Ends)에 일대일로 연결된다. 모터 내부 3상 코일의 반대편 꼬리 끝(Tail Ends)은 모두 하나로 묶여 Y결선의 중성점(Neutral Point)을 형성한다.</li>
+                <li><strong>AB 배터리 루프 완성:</strong> 핵심적인 배선은 모터의 이 중성점으로부터 나와 배터리 팩의 중간 지점, 즉 제1 배터리 셀 그룹(A)과 제2 배터리 셀 그룹(B)이 맞닿는 제1 연결점(First Connection Point)으로 직접 연결된다는 것이다.</li>
+            </ul>
+
+            <h3>3.2. 고주파 에너지 스위칭 메커니즘 (Modes of Operation I-IV)</h3>
+            <p>이 회로망에서 BMS와 모터 제어기는 상단 및 하단 MOSFET(또는 IGBT)에 상보적인 펄스 폭 변조(PWM) 신호를 인가하여 에너지를 고속으로 스위칭한다. 이 과정은 배터리 그룹 간의 얕은 충전과 방전(Shallow Charging and Discharging)을 고주파로 반복하며 4단계의 모드로 순환한다.</p>
+            <ul>
+                <li><strong>Mode I (배터리 A 방전 및 인덕터 충전):</strong> 제어 모듈이 상단 브리지 암의 특정 스위치를 턴온(Turn-on)하고 하단을 차단한다. 배터리 A 그룹의 폐회로가 형성되며 전류가 모터 코일(인덕터 L)을 향해 흐른다. 배터리 A는 방전하면서 에너지를 내보내고, 모터 코일은 자기장 형태로 이 에너지를 저장하며 인덕터 전류가 선형적으로 상승한다.</li>
+                <li><strong>Mode II (인덕터 환류 및 전위 역전):</strong> 스위치가 오프되기 직전까지 인덕터 전류가 최고조에 달한다. 이때 스위치를 차단하면 인덕터의 환류 특성에 의해 순간적으로 전압이 상승(Voltage Elevation Conversion)하며 전류의 크기와 방향을 정밀하게 제어할 수 있는 과도 상태가 형성된다.</li>
+                <li><strong>Mode III (인덕터 방전 및 배터리 B 충전):</strong> 하단 브리지 암의 스위치를 턴온한다. 이제 모터 코일(인덕터)에 저장되었던 막대한 자기 에너지가 배터리 B 그룹을 향해 쏟아진다. 이 과정에서 배터리 B는 극도로 짧은 시간 동안 강력한 피크 전류에 의해 충전(Charging)을 받게 된다.</li>
+                <li><strong>Mode IV (역방향 사이클 시작):</strong> 인덕터 전류가 0으로 하강하면 턴온 상태를 유지하는 동안 반대로 배터리 B 그룹이 방전을 시작하여 인덕터를 충전한다. 이후 하단 스위치를 끄고 상단 스위치를 켜면 인덕터의 에너지가 다시 배터리 A 그룹을 강하게 충전한다.</li>
+            </ul>
+
+            <h3>3.3. d-q 좌표계 변환을 통한 영토크(Zero-Torque) 제어 이론</h3>
+            <p>펄스 전류가 구동 모터의 고정자 권선을 고속으로 통과할 때 가장 심각한 공학적 위험은 모터가 의도치 않은 기계적 회전력(Torque)을 발생시켜 차량이 덜컹거리거나(Shaking) 급발진하는 현상이다. BYD의 기술진은 최신 모터 제어 이론인 공간 벡터 펄스 폭 변조(SVPWM)와 파크 변환(Park Transformation)을 응용하여 이 문제를 완벽하게 통제하였다.</p>
+            <div class="formula">
+                Q<sub>total</sub> = Q<sub>ohmic</sub> + Q<sub>reaction</sub> + Q<sub>polarization</sub>
+            </div>
+            <p>교류 모터의 제어에서는 3상 전류(I<sub>u</sub>, I<sub>v</sub>, I<sub>w</sub>)를 회전하는 직교 좌표계로 변환하여 두 개의 독립된 성분으로 분리한다. 하나는 모터의 회전력(토크)을 직접적으로 생성하는 <strong>직교축 전류(I<sub>q</sub>, Quadrature-axis current)</strong>이며, 다른 하나는 자기장(자속)만을 생성하며 토크 발생에는 기여하지 않는 <strong>직축 전류(I<sub>d</sub>, Direct-axis current)</strong>이다.</p>
+            <p>BYD의 펄스 히팅 로직은 배터리 온도가 목표 임계값보다 낮아 가열 조건이 충족되면 모터 제어기에 개입하여 직교축 전압 및 전류(I<sub>q</sub>)를 0으로 강제 할당한다. 반면, 배터리가 요구하는 발열량에 맞추어 계산된 거대한 펄스 전류 파형은 온전히 직축 전류(I<sub>d</sub>) 방향으로만 인가되도록 제어한다.</p>
+
+            <h2>4. 물리적 열역학: 줄 히팅(Joule Heating) 및 온도 균일성 확보 메커니즘</h2>
+            <p>모터와 인버터를 거쳐 배터리 팩으로 쏟아지는 이 거대한 고주파 교류 펄스 전류는 전기화학 셀 내부에서 복합적인 물리적 발열 반응을 유도한다. 이 발열 메커니즘은 통상적으로 P2D(Pseudo-Two-Dimensional) 다공성 전극 전기화학-열 연성 모델을 통해 수학적으로 엄밀히 해석된다.</p>
+            
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th>가열 방식 비교</th>
+                        <th>열 발생 기작</th>
+                        <th>가열 속도 및 온도 분포 특성</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>전통적 외부 PTC 및 액랭 가열</strong></td>
+                        <td>셀 외부 하우징 또는 냉각판 패드에서의 전도열</td>
+                        <td>외부에서 내부로 전도되므로 속도가 느리며, 배터리 팩 외벽과 코어 간의 심각한 온도 편차 유발. 국부적 온도 불균형으로 노화 가속 우려.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>BYD 고주파 AC 펄스 자가 가열</strong></td>
+                        <td>배터리 내부 전해액 및 전극 전체에서의 직접적인 줄 히팅</td>
+                        <td>셀 내부 전체 체적에서 동시다발적으로 열이 발생하므로, 극한의 환경에서도 가열 속도가 매우 빠르고 팩 내부 전체의 온도가 극히 균일함.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p>실제 50 Ah 용량의 LiFePO4(LFP) 배터리를 대상으로 한 실험에서, 배터리 온도는 253.15 K(-20°C)에서 시작하여 단 365초 만에 278.15 K(5°C)까지 상승하였다. 이는 분당 평균 3.29 K의 온도를 상승시키는 놀라운 가열 속도이다. BYD의 e-Platform 3.0은 이러한 학술적 배경을 완벽히 상용화하여, -35°C의 극한 저온에서도 차량 구동과 초급속 충전을 위한 배터리 정상 온도 확보를 수 분 내에 달성한다.</p>
+
+            <h2>5. 화학적 한계 돌파: 리튬 석출(Lithium Plating) 원천 억제 메커니즘</h2>
+            <p>BYD 펄스 히팅 제어의 진정한 위력은 고속 충전 과정에서 리튬이온 배터리의 치명적인 노화 및 화재 원인인 '리튬 석출(Lithium Plating)'을 근본적으로 예방하는 동적 전기화학 제어에 있다.</p>
+            
+            <h3>5.1. 가역적 스트리핑(Reversible Stripping)을 통한 계면 분극 해소</h3>
+            <p>수백 헤르츠의 고주파로 충전 전류와 방전 전류가 교차하는 펄스 히팅 환경에서는, 양의 반주기 동안 리튬 이온이 음극 표면으로 밀려와 순간적인 미세 석출 징후를 보이더라도, 즉시 뒤따르는 음의 반주기의 방전 전류에 의해 석출되려던 금속 리튬이 전자를 내어놓고 다시 이온화되는 <strong>'스트리핑(Stripping)'</strong> 반응이 강제된다.</p>
+
+            <h3>5.2. 위상차(Phase Difference) 기반 동적 주파수 적응형 제어</h3>
+            <p>BMS가 충전 중 전극 계면의 분극 저항이 한계치에 다다라 리튬 석출 조건에 근접하게 되면, 전압-전류 위상차의 변화를 감지하여 즉시 모터 제어기에 명령을 내려 인가되는 교류 펄스의 <strong>스위칭 주파수를 동적으로 상향 조정(Up-shift)</strong>한다. 주파수가 높아지면 반응에 참여하는 이온의 확산 시간이 더욱 짧아져 분극 효과가 즉각적으로 감쇄하며, 리튬 석출 현상은 사전에 회피된다.</p>
+
+            <h2>6. 블레이드 배터리 2.0(Blade Battery 2.0)의 재료공학적 진화와 10C 충전의 연계</h2>
+            <p>물리화학적 소재 혁신과 결합될 때 비로소 10C 단위의 메가와트(MW) 급속 충전이라는 결과를 만들어낸다.</p>
+            
+            <h3>6.1. 자기 발열형 저온 전해액(Self-Heating Electrolyte)의 개질</h3>
+            <p>불소화 탄산염 공용매를 도입하여 탈용매화에 필요한 에너지 장벽을 15 kJ/mol 이하로 대폭 낮추는 데 성공하였다. -60°C에 이르는 초극저온 환경에서도 기본적인 이온 전도성을 상실하지 않으며, 펄스 히팅 전류가 원활하게 파고들 수 있는 화학적 틈새를 제공한다.</p>
+
+            <h3>6.2. LMFP 코어-쉘 양극재와 Si-C 나노 음극의 구조 설계</h3>
+            <ul>
+                <li><strong>LMFP 양극재 코어-쉘 구조:</strong> 망간 함량이 높은 내부 코어를 철 함량이 높은 강건한 LFP 층(Shell)으로 감싸 고속 충방전 시 전극의 붕괴를 막고 안정성을 극대화함.</li>
+                <li><strong>Si-C 복합 음극:</strong> 흑연 입자의 배열을 전극 평면에 수직 방향으로 재구성하여 리튬 이온의 물리적 이동 거리와 수송 저항을 비약적으로 감축시킴.</li>
+            </ul>
+
+            <h3>6.3. 메가와트 플래시 충전(MW Flash Charging)과 능동 냉각</h3>
+            <p>10C 충전 속도, 1000A, 1000V 아키텍처를 통해 단 5분 만에 400km 주행에 필요한 전력을 채운다. 팩 설계에는 직접 냉매 3D 듀얼 레인 냉각 시스템을 적용하여 1메가와트라는 피크 발열을 실시간으로 상쇄한다.</p>
+
+            <h2>7. 가변 자속 구동 모터(VF-PMSM) 기술과의 시스템적 시너지</h2>
+            <p>BYD는 고속도로 정속 주행 시의 모터 효율 저하 문제를 해결할 <strong>가변 자속 영구 자석 동기 모터(VF-PMSM)</strong>를 상용화했다. 모터 회전자 내부에 자속 조정 요소를 내장하여, 고속 주행 시 실효 교쇄 자속을 물리적으로 감소시킴으로써 약계자 제어로 인한 에너지 낭비를 원천 차단한다.</p>
+
+            <h2>8. 결론</h2>
+            <p>BYD의 펄스 히팅 및 관련 통합 아키텍처는 전기자동차의 전비, 안전성, 극한 환경 적응력, 그리고 초급속 충전의 편의성을 한 번에 해결한 전동화 시스템 제어의 바이블이다. 하드웨어 활용의 패러다임을 혁신하고, 소재 공학과 전력전자의 완벽한 결합을 통해 메가와트 시대라는 새로운 이정표를 향해 나아가고 있다.</p>
+            
+            <p style="text-align: center; margin-top: 5rem; color: #9ca3af; font-size: 0.875rem;">--- 보고서 끝 ---</p>
+        </div>
+    </div>
+</main>
+
+<script>
+// Tab Switching Logic
+function switchTab(tabId) {
+    const tabs = ['dashboard', 'summary', 'deepdive'];
+    const buttons = {
+        dashboard: document.getElementById('tab-btn-dashboard'),
+        summary: document.getElementById('tab-btn-summary'),
+        deepdive: document.getElementById('tab-btn-deepdive')
+    };
+    const contents = {
+        dashboard: document.getElementById('content-dashboard'),
+        summary: document.getElementById('content-summary'),
+        deepdive: document.getElementById('content-deepdive')
+    };
+
+    tabs.forEach(t => {
+        if (t === tabId) {
+            // Active Button
+            buttons[t].classList.add('bg-brandBlue', 'text-white', 'shadow-lg', 'shadow-brandBlue/20');
+            buttons[t].classList.remove('text-gray-400', 'hover:text-white', 'hover:bg-gray-800');
+            
+            // Show Content
+            contents[t].classList.remove('hidden');
+            setTimeout(() => {
+                contents[t].classList.remove('opacity-0');
+            }, 50);
+        } else {
+            // Inactive Button
+            buttons[t].classList.remove('bg-brandBlue', 'text-white', 'shadow-lg', 'shadow-brandBlue/20');
+            buttons[t].classList.add('text-gray-400', 'hover:text-white', 'hover:bg-gray-800');
+            
+            // Hide Content
+            contents[t].classList.add('opacity-0');
+            setTimeout(() => {
+                contents[t].classList.add('hidden');
+            }, 300);
+        }
+    });
+}
+
+function wrapLabel(label, maxLength) {
+    if (label.length <= maxLength) return label;
+    const words = label.split(' ');
+    const lines = [];
+    let currentLine = '';
+    
+    for (let i = 0; i < words.length; i++) {
+        const word = words[i];
+        if ((currentLine + word).length > maxLength) {
+            if (currentLine.length > 0) {
+                lines.push(currentLine.trim());
+                currentLine = word + ' ';
+            } else {
+                lines.push(word);
+                currentLine = '';
+            }
+        } else {
+            currentLine += word + ' ';
+        }
+    }
+    if (currentLine.trim().length > 0) {
+        lines.push(currentLine.trim());
+    }
+    return lines;
+}
+
+function processLabels(labelsArray) {
+    const processed = [];
+    for (let i = 0; i < labelsArray.length; i++) {
+        processed.push(wrapLabel(labelsArray[i], 16));
+    }
+    return processed;
+}
+
+const commonTooltipLogic = {
+    callbacks: {
+        title: function(tooltipItems) {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            } else {
+                return label;
+            }
+        }
+    }
+};
+
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.font.family = "'Segoe UI', sans-serif";
+
+window.addEventListener('load', function() {
+    
+    const ctx1 = document.getElementById('resistanceChart').getContext('2d');
+    const labels1 = processLabels(['영하 20도 (-20°C)', '빙점 (0°C)', '상온 (25°C)']);
+    new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: labels1,
+            datasets: [{
+                label: '내부 저항 (mΩ)',
+                data: [150, 45, 15],
+                backgroundColor: ['#06b6d4', '#3b82f6', '#f59e0b'],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: commonTooltipLogic
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#334155' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    const ctx2 = document.getElementById('radarChart').getContext('2d');
+    const labels2 = processLabels(['이온 확산 속도 향상', '전하 전달 저항 감소', '내부 발열 균일성', '리튬 석출 억제력', '시스템 에너지 효율']);
+    new Chart(ctx2, {
+        type: 'radar',
+        data: {
+            labels: labels2,
+            datasets: [
+                {
+                    label: 'BYD 고주파 펄스 히팅',
+                    data: [95, 90, 98, 95, 85],
+                    backgroundColor: 'rgba(245, 158, 11, 0.4)',
+                    borderColor: '#f59e0b',
+                    pointBackgroundColor: '#f59e0b',
+                    borderWidth: 2
+                },
+                {
+                    label: '기존 외부 PTC 가열',
+                    data: [40, 50, 30, 45, 60],
+                    backgroundColor: 'rgba(59, 130, 246, 0.4)',
+                    borderColor: '#3b82f6',
+                    pointBackgroundColor: '#3b82f6',
+                    borderWidth: 2
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: commonTooltipLogic
+            },
+            scales: {
+                r: {
+                    angleLines: { color: '#334155' },
+                    grid: { color: '#334155' },
+                    pointLabels: { color: '#e2e8f0', font: { size: 11 } },
+                    ticks: { display: false, min: 0, max: 100 }
+                }
+            }
+        }
+    });
+
+    const ctx3 = document.getElementById('tempRiseChart').getContext('2d');
+    const labels3 = ['0분', '2분', '4분', '6분', '8분', '10분'];
+    new Chart(ctx3, {
+        type: 'line',
+        data: {
+            labels: labels3,
+            datasets: [
+                {
+                    label: '펄스 히팅 온도 (°C)',
+                    data: [-20, -10, 0, 10, 20, 28],
+                    borderColor: '#f59e0b',
+                    backgroundColor: '#f59e0b',
+                    tension: 0.4,
+                    borderWidth: 3
+                },
+                {
+                    label: 'PTC 히팅 온도 (°C)',
+                    data: [-20, -18, -15, -11, -6, -2],
+                    borderColor: '#3b82f6',
+                    backgroundColor: '#3b82f6',
+                    tension: 0.4,
+                    borderWidth: 3,
+                    borderDash: [5, 5]
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: commonTooltipLogic
+            },
+            scales: {
+                y: {
+                    grid: { color: '#334155' },
+                    title: { display: true, text: '배터리 온도 (°C)', color: '#94a3b8' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    const ctx4 = document.getElementById('chargingCurveChart').getContext('2d');
+    const labels4 = ['0분', '15분', '30분', '45분', '60분', '75분', '90분'];
+    new Chart(ctx4, {
+        type: 'line',
+        data: {
+            labels: labels4,
+            datasets: [
+                {
+                    label: '펄스 히팅 적용 (SOC %)',
+                    data: [10, 15, 30, 65, 80, 85, 90],
+                    borderColor: '#06b6d4',
+                    backgroundColor: 'rgba(6, 182, 212, 0.2)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3
+                },
+                {
+                    label: '일반 냉간 충전 (SOC %)',
+                    data: [10, 12, 16, 25, 35, 45, 55],
+                    borderColor: '#64748b',
+                    backgroundColor: 'rgba(100, 116, 139, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: commonTooltipLogic
+            },
+            scales: {
+                y: {
+                    min: 0,
+                    max: 100,
+                    grid: { color: '#334155' },
+                    title: { display: true, text: '충전량 (SOC %)', color: '#94a3b8' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+});
+</script>
+</body>
+</html>

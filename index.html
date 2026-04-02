@@ -244,6 +244,10 @@ Confirmation: Tabs added for Dashboard vs. Report.
                     <div class="chart-container h-[400px]">
                         <canvas id="chargingCurveChart"></canvas>
                     </div>
+                </div>
+            </div>
+        </section>
+
         <section class="mb-16">
             <div class="flex items-center justify-between mb-8">
                 <h2 class="text-2xl font-bold text-white border-l-4 border-brandBlue pl-3">4. 화학적 돌파구: 리튬 석출 능동 제어</h2>
@@ -516,38 +520,21 @@ Confirmation: Tabs added for Dashboard vs. Report.
 // Tab Switching Logic
 function switchTab(tabId) {
     const tabs = ['dashboard', 'summary', 'deepdive'];
-    const buttons = {
-        dashboard: document.getElementById('tab-btn-dashboard'),
-        summary: document.getElementById('tab-btn-summary'),
-        deepdive: document.getElementById('tab-btn-deepdive')
-    };
-    const contents = {
-        dashboard: document.getElementById('content-dashboard'),
-        summary: document.getElementById('content-summary'),
-        deepdive: document.getElementById('content-deepdive')
-    };
-
     tabs.forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const content = document.getElementById(`content-${t}`);
         if (t === tabId) {
-            // Active Button
-            buttons[t].classList.add('bg-brandBlue', 'text-white', 'shadow-lg', 'shadow-brandBlue/20');
-            buttons[t].classList.remove('text-gray-400', 'hover:text-white', 'hover:bg-gray-800');
-            
-            // Show Content
-            contents[t].classList.remove('hidden');
-            setTimeout(() => {
-                contents[t].classList.remove('opacity-0');
-            }, 50);
+            btn.classList.add('bg-brandBlue', 'text-white', 'shadow-lg', 'shadow-brandBlue/20');
+            btn.classList.remove('text-gray-400', 'hover:text-white', 'hover:bg-gray-800');
+            content.classList.remove('hidden');
+            content.classList.add('opacity-100');
+            content.classList.remove('opacity-0');
         } else {
-            // Inactive Button
-            buttons[t].classList.remove('bg-brandBlue', 'text-white', 'shadow-lg', 'shadow-brandBlue/20');
-            buttons[t].classList.add('text-gray-400', 'hover:text-white', 'hover:bg-gray-800');
-            
-            // Hide Content
-            contents[t].classList.add('opacity-0');
-            setTimeout(() => {
-                contents[t].classList.add('hidden');
-            }, 300);
+            btn.classList.remove('bg-brandBlue', 'text-white', 'shadow-lg', 'shadow-brandBlue/20');
+            btn.classList.add('text-gray-400', 'hover:text-white', 'hover:bg-gray-800');
+            content.classList.add('hidden');
+            content.classList.add('opacity-0');
+            content.classList.remove('opacity-100');
         }
     });
 }

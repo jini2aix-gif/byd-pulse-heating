@@ -358,49 +358,50 @@ Summary of Plan: Introduction to cold-weather battery issues -> Electrical mecha
                         </table>
                     </div>
                 </div>
-                <div class="relative group">
-                <div class="relative group bg-gray-900/50 p-6 rounded-2xl border border-gray-700 shadow-inner overflow-hidden">
-                    <!-- SVG Diagram for BSA Architecture (Ref: Pulse1.png) -->
-                    <svg viewBox="0 0 500 350" class="w-full h-auto drop-shadow-2xl">
+                <div class="relative group bg-gray-900/40 p-10 rounded-3xl border border-gray-700 shadow-2xl overflow-hidden min-h-[400px] flex items-center justify-center">
+                    <!-- High Fidelity SVG Native Diagram (Replaces Pulse1.png) -->
+                    <svg viewBox="0 0 500 350" class="w-full h-full max-h-[350px]">
                         <defs>
-                            <linearGradient id="battGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <linearGradient id="battGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
                                 <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
                                 <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
                             </linearGradient>
-                            <filter id="glow">
-                                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            <filter id="glow2" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="3" result="blur" />
+                                <feComposite in="SourceGraphic" in2="blur" operator="over" />
                             </filter>
                         </defs>
                         <!-- Main Battery Container -->
-                        <rect x="50" y="30" width="160" height="250" rx="10" fill="url(#battGrad)" stroke="#334155" stroke-width="2"/>
-                        <text x="130" y="20" fill="#94a3b8" font-size="12" font-family="monospace" text-anchor="middle" font-weight="bold">BATTERY PACK (800V)</text>
+                        <rect x="50" y="40" width="160" height="260" rx="15" fill="url(#battGrad2)" stroke="#334155" stroke-width="3"/>
+                        <text x="130" y="25" fill="#64748b" font-size="10" font-family="monospace" text-anchor="middle" font-weight="bold" letter-spacing="2">DUAL-BANK BATTERY SYSTEM</text>
                         
                         <!-- Upper Pack -->
-                        <rect x="70" y="50" width="120" height="90" rx="5" fill="#1e293b" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="4,2"/>
-                        <text x="130" y="100" fill="#06b6d4" font-size="14" font-weight="bold" text-anchor="middle">Upper Group</text>
+                        <rect x="70" y="60" width="120" height="100" rx="8" fill="#1e293b" stroke="#06b6d4" stroke-width="2" stroke-dasharray="8,4"/>
+                        <text x="130" y="115" fill="#06b6d4" font-size="14" font-weight="black" text-anchor="middle" filter="url(#glow2)">UPPER PACK</text>
                         
                         <!-- Lower Pack -->
-                        <rect x="70" y="170" width="120" height="90" rx="5" fill="#1e293b" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="4,2"/>
-                        <text x="130" y="220" fill="#06b6d4" font-size="14" font-weight="bold" text-anchor="middle">Lower Group</text>
+                        <rect x="70" y="180" width="120" height="100" rx="8" fill="#1e293b" stroke="#06b6d4" stroke-width="2" stroke-dasharray="8,4"/>
+                        <text x="130" y="235" fill="#06b6d4" font-size="14" font-weight="black" text-anchor="middle" filter="url(#glow2)">LOWER PACK</text>
                         
-                        <!-- Middle Connection Point -->
-                        <circle cx="190" cy="155" r="4" fill="#f59e0b" filter="url(#glow)"/>
-                        <path d="M190 155 H280" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4,4"/>
-                        <text x="240" y="150" fill="#f59e0b" font-size="10" font-family="monospace">CENTRAL TAP</text>
+                        <!-- Middle Junction -->
+                        <circle cx="190" cy="170" r="6" fill="#f59e0b" filter="url(#glow2)"/>
+                        <path d="M190 170 H300" stroke="#f59e0b" stroke-width="3" stroke-dasharray="5,5"/>
+                        <text x="250" y="160" fill="#f59e0b" font-size="11" font-family="monospace" font-weight="bold">HV BUS CENTER-TAP</text>
 
-                        <!-- Inverter & Motor -->
-                        <rect x="320" y="110" width="100" height="100" rx="15" fill="#0f172a" stroke="#3b82f6" stroke-width="2"/>
-                        <text x="370" y="165" fill="#3b82f6" font-size="12" font-weight="bold" text-anchor="middle">Inverter (SiC)</text>
-                        <circle cx="370" cy="270" r="35" fill="#0f172a" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,3"/>
-                        <text x="370" y="275" fill="#3b82f6" font-size="10" font-weight="bold" text-anchor="middle">Inductor/Motor</text>
+                        <!-- Inverter & Motor Integration -->
+                        <rect x="340" y="120" width="110" height="110" rx="20" fill="#0f172a" stroke="#3b82f6" stroke-width="3"/>
+                        <text x="395" y="180" fill="#3b82f6" font-size="14" font-weight="black" text-anchor="middle">SiC INVERTER</text>
                         
-                        <!-- Connections -->
-                        <path d="M210 50 H320" stroke="#475569" stroke-width="2"/>
-                        <path d="M210 280 H320" stroke="#475569" stroke-width="2"/>
-                        <path d="M280 155 V235" stroke="#f59e0b" stroke-width="2"/>
+                        <circle cx="395" cy="285" r="35" fill="none" stroke="#3b82f6" stroke-width="2" stroke-dasharray="6,3"/>
+                        <path d="M375 285 Q395 255 415 285 T455 285" stroke="#3b82f6" stroke-width="2" fill="none"/>
+                        <text x="395" y="290" fill="#3b82f6" font-size="10" font-weight="bold" text-anchor="middle">MOTOR INDUCTOR</text>
+                        
+                        <!-- Main Rails -->
+                        <path d="M210 60 H340" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+                        <path d="M210 300 H340" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+                        <path d="M300 170 V240" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
                     </svg>
-                    <span class="absolute bottom-4 right-4 bg-brandAmber/80 text-white text-[10px] font-bold px-2 py-1 rounded">FIG 1. BSA 회로 구성도 (Reconstructed)</span>
+                    <span class="absolute bottom-6 right-6 bg-brandBlue/90 text-white text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-blue-400/50">FIG 1. BSA 회로 구성도 (SVG Native)</span>
                 </div>
                 </div>
             </div>
@@ -470,7 +471,7 @@ Summary of Plan: Introduction to cold-weather battery issues -> Electrical mecha
                         </tr>
                     </tbody>
                 </table>
-                <span class="absolute top-4 right-4 bg-gray-900/80 text-gray-400 text-[10px] px-2 py-1 rounded">FIG 2. 릴레이 온/오프 케이스 분석 (Reconstructed)</span>
+                <span class="absolute top-4 right-4 bg-gray-900/90 text-brandBlue text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-blue-500/30">FIG 2. 릴레이 온/오프 케이스 분석 (SVG Table)</span>
             </div>
             </div>
         </section>

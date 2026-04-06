@@ -359,9 +359,49 @@ Summary of Plan: Introduction to cold-weather battery issues -> Electrical mecha
                     </div>
                 </div>
                 <div class="relative group">
-                    <img src="Pulse1.png" alt="BSA Architecture" class="rounded-2xl border border-gray-700 shadow-2xl transition-transform group-hover:scale-[1.02] duration-500">
-                    <div class="absolute inset-0 rounded-2xl bg-gradient-to-t from-brandBase/60 to-transparent pointer-events-none"></div>
-                    <span class="absolute bottom-4 right-4 bg-brandAmber/80 text-white text-[10px] font-bold px-2 py-1 rounded">FIG 1. BSA 회로 구성도</span>
+                <div class="relative group bg-gray-900/50 p-6 rounded-2xl border border-gray-700 shadow-inner overflow-hidden">
+                    <!-- SVG Diagram for BSA Architecture (Ref: Pulse1.png) -->
+                    <svg viewBox="0 0 500 350" class="w-full h-auto drop-shadow-2xl">
+                        <defs>
+                            <linearGradient id="battGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
+                            </linearGradient>
+                            <filter id="glow">
+                                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            </filter>
+                        </defs>
+                        <!-- Main Battery Container -->
+                        <rect x="50" y="30" width="160" height="250" rx="10" fill="url(#battGrad)" stroke="#334155" stroke-width="2"/>
+                        <text x="130" y="20" fill="#94a3b8" font-size="12" font-family="monospace" text-anchor="middle" font-weight="bold">BATTERY PACK (800V)</text>
+                        
+                        <!-- Upper Pack -->
+                        <rect x="70" y="50" width="120" height="90" rx="5" fill="#1e293b" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="4,2"/>
+                        <text x="130" y="100" fill="#06b6d4" font-size="14" font-weight="bold" text-anchor="middle">Upper Group</text>
+                        
+                        <!-- Lower Pack -->
+                        <rect x="70" y="170" width="120" height="90" rx="5" fill="#1e293b" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="4,2"/>
+                        <text x="130" y="220" fill="#06b6d4" font-size="14" font-weight="bold" text-anchor="middle">Lower Group</text>
+                        
+                        <!-- Middle Connection Point -->
+                        <circle cx="190" cy="155" r="4" fill="#f59e0b" filter="url(#glow)"/>
+                        <path d="M190 155 H280" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4,4"/>
+                        <text x="240" y="150" fill="#f59e0b" font-size="10" font-family="monospace">CENTRAL TAP</text>
+
+                        <!-- Inverter & Motor -->
+                        <rect x="320" y="110" width="100" height="100" rx="15" fill="#0f172a" stroke="#3b82f6" stroke-width="2"/>
+                        <text x="370" y="165" fill="#3b82f6" font-size="12" font-weight="bold" text-anchor="middle">Inverter (SiC)</text>
+                        <circle cx="370" cy="270" r="35" fill="#0f172a" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,3"/>
+                        <text x="370" y="275" fill="#3b82f6" font-size="10" font-weight="bold" text-anchor="middle">Inductor/Motor</text>
+                        
+                        <!-- Connections -->
+                        <path d="M210 50 H320" stroke="#475569" stroke-width="2"/>
+                        <path d="M210 280 H320" stroke="#475569" stroke-width="2"/>
+                        <path d="M280 155 V235" stroke="#f59e0b" stroke-width="2"/>
+                    </svg>
+                    <span class="absolute bottom-4 right-4 bg-brandAmber/80 text-white text-[10px] font-bold px-2 py-1 rounded">FIG 1. BSA 회로 구성도 (Reconstructed)</span>
+                </div>
                 </div>
             </div>
         </section>
@@ -394,8 +434,44 @@ Summary of Plan: Introduction to cold-weather battery issues -> Electrical mecha
                 </div>
             </div>
             <div class="relative group max-w-4xl mx-auto">
-                <img src="Pulse2.png" alt="Relay Logic" class="rounded-xl border border-gray-800 shadow-xl">
-                <span class="absolute top-4 right-4 bg-gray-900/80 text-gray-400 text-[10px] px-2 py-1 rounded">FIG 2. 릴레이 온/오프 케이스 분석</span>
+            <div class="relative group bg-brandBase/40 rounded-2xl p-6 border border-gray-800 shadow-inner overflow-x-auto">
+                <!-- Data Table Design (Ref: Pulse2.png) -->
+                <table class="w-full min-w-[600px] text-center border-separate border-spacing-2">
+                    <thead>
+                        <tr class="text-gray-500 text-xs font-mono">
+                            <th class="p-3">제어 모드</th>
+                            <th class="p-3">RLY P / N</th>
+                            <th class="p-3">RLY#1</th>
+                            <th class="p-3">RLY#2</th>
+                            <th class="p-3">작동 상태</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="bg-brandAmber/5 border border-brandAmber/20 rounded-xl">
+                            <td class="p-4 font-bold text-brandAmber">자가 가열 (Heating)</td>
+                            <td class="p-4"><span class="px-3 py-1 bg-brandAmber text-brandBase rounded-full text-xs font-black">ON</span></td>
+                            <td class="p-4"><span class="px-3 py-1 bg-brandAmber text-brandBase rounded-full text-xs font-black">ON</span></td>
+                            <td class="p-4"><span class="px-3 py-1 bg-brandAmber text-brandBase rounded-full text-xs font-black">ON</span></td>
+                            <td class="p-4 text-xs text-gray-300">팩 분할 및 펄스 고주파 순환 가열</td>
+                        </tr>
+                        <tr class="bg-brandBlue/5 border border-brandBlue/20 rounded-xl">
+                            <td class="p-4 font-bold text-brandBlue">일반 주행 (Driving)</td>
+                            <td class="p-4"><span class="px-3 py-1 bg-brandBlue text-white rounded-full text-xs font-black">ON</span></td>
+                            <td class="p-4"><span class="px-3 py-1 bg-brandBlue text-white rounded-full text-xs font-black">ON</span></td>
+                            <td class="p-4"><span class="px-3 py-1 bg-gray-700 text-gray-500 rounded-full text-xs font-black">OFF</span></td>
+                            <td class="p-4 text-xs text-gray-300">표준 직렬 배터리 팩 출력 제공</td>
+                        </tr>
+                        <tr class="bg-gray-800/10 border border-gray-800 rounded-xl">
+                            <td class="p-4 font-bold text-gray-500">주차/대기 (Park)</td>
+                            <td class="p-4"><span class="px-3 py-1 bg-gray-800 text-gray-600 rounded-full text-xs font-black">OFF</span></td>
+                            <td class="p-4"><span class="px-3 py-1 bg-gray-800 text-gray-600 rounded-full text-xs font-black">OFF</span></td>
+                            <td class="p-4"><span class="px-3 py-1 bg-gray-800 text-gray-600 rounded-full text-xs font-black">OFF</span></td>
+                            <td class="p-4 text-xs text-gray-600">시스템 하이볼티지 차단 유도</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <span class="absolute top-4 right-4 bg-gray-900/80 text-gray-400 text-[10px] px-2 py-1 rounded">FIG 2. 릴레이 온/오프 케이스 분석 (Reconstructed)</span>
+            </div>
             </div>
         </section>
 
@@ -407,23 +483,45 @@ Summary of Plan: Introduction to cold-weather battery issues -> Electrical mecha
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-                <div class="relative group">
-                    <img src="Pulse3.png" alt="Pulse Cycle Phase 1" class="rounded-2xl border border-gray-700 shadow-xl">
+                <div class="relative group bg-gray-900/50 p-6 rounded-2xl border border-gray-700 shadow-inner">
+                    <!-- SVG Diagram for Phase 1 (Ref: Pulse3.png) -->
+                    <svg viewBox="0 0 300 180" class="w-full h-auto">
+                        <rect x="20" y="30" width="80" height="40" rx="4" fill="#334155"/>
+                        <rect x="20" y="110" width="80" height="40" rx="4" fill="#1e293b" opacity="0.5"/>
+                        <circle cx="240" cy="90" r="40" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4,2"/>
+                        <path d="M100 50 H240 V50" stroke="#f59e0b" stroke-width="3" fill="none" class="animate-pulse">
+                            <animate attributeName="stroke-dashoffset" from="100" to="0" dur="2s" repeatCount="indefinite" />
+                        </path>
+                        <text x="60" y="55" fill="white" font-size="10" text-anchor="middle" font-weight="bold">UPPER</text>
+                        <text x="60" y="135" fill="gray" font-size="10" text-anchor="middle">LOWER</text>
+                        <text x="240" y="95" fill="#f59e0b" font-size="20" text-anchor="middle">🌀</text>
+                    </svg>
                     <div class="absolute top-4 left-4 bg-brandAmber text-brandBase text-[10px] font-black px-3 py-1 rounded-full">SEQ #1: UPPER DISCHARGE</div>
                     <div class="mt-4 p-4 bg-brandSurface/50 rounded-xl border border-gray-800">
-                        <h4 class="text-white font-bold text-sm mb-2">Phase 1-2: 에너지 충전 및 B 그룹 가열</h4>
+                        <h4 class="text-white font-bold text-sm mb-2">Phase 1-2: 에너지 펌핑</h4>
                         <p class="text-xs text-gray-500 leading-relaxed">
-                            상반부(Upper) 배터리를 방전하여 모터 인덕터에 에너지를 임시 저장한 후, 이를 하반부(Lower) 배터리로 쏟아부어 급속 충전 가열을 수행합니다.
+                            상반부 배터리를 방전하여 자기 에너지를 축적하고 하반부로 전달하는 펌핑 단계입니다.
                         </p>
                     </div>
                 </div>
-                <div class="relative group">
-                    <img src="Pulse4.png" alt="Pulse Cycle Phase 2" class="rounded-2xl border border-gray-700 shadow-xl">
+                <div class="relative group bg-gray-900/50 p-6 rounded-2xl border border-gray-700 shadow-inner">
+                    <!-- SVG Diagram for Phase 2 (Ref: Pulse4.png) -->
+                    <svg viewBox="0 0 300 180" class="w-full h-auto">
+                        <rect x="20" y="30" width="80" height="40" rx="4" fill="#1e293b" opacity="0.5"/>
+                        <rect x="20" y="110" width="80" height="40" rx="4" fill="#334155"/>
+                        <circle cx="240" cy="90" r="40" fill="none" stroke="#3b82f6" stroke-width="2" stroke-dasharray="4,2"/>
+                        <path d="M240 130 H100" stroke="#3b82f6" stroke-width="3" fill="none" class="animate-pulse">
+                            <animate attributeName="stroke-dashoffset" from="100" to="0" dur="2s" repeatCount="indefinite" />
+                        </path>
+                        <text x="60" y="55" fill="gray" font-size="10" text-anchor="middle">UPPER</text>
+                        <text x="60" y="135" fill="white" font-size="10" text-anchor="middle" font-weight="bold">LOWER</text>
+                        <text x="240" y="95" fill="#3b82f6" font-size="20" text-anchor="middle">🌀</text>
+                    </svg>
                     <div class="absolute top-4 left-4 bg-brandBlue text-white text-[10px] font-black px-3 py-1 rounded-full">SEQ #2: LOWER DISCHARGE</div>
                     <div class="mt-4 p-4 bg-brandSurface/50 rounded-xl border border-gray-800">
-                        <h4 class="text-white font-bold text-sm mb-2">Phase 3-4: 에너지 회수 및 A 그룹 가열</h4>
+                        <h4 class="text-white font-bold text-sm mb-2">Phase 3-4: 에너지 회수</h4>
                         <p class="text-xs text-gray-500 leading-relaxed">
-                            반대로 하반부를 방전하여 상반부를 충전함으로써 전체 팩의 전하 균형(Cell Balancing)을 유지하면서 교류 펄스 사이클을 완성합니다.
+                            하반부 에너지를 상반부로 다시 주입하여 전체 팩의 에너지 가열 및 균형을 맞추는 단계입니다.
                         </p>
                     </div>
                 </div>
@@ -462,8 +560,9 @@ Summary of Plan: Introduction to cold-weather battery issues -> Electrical mecha
             <h2 class="text-2xl font-bold text-white mb-8 border-l-4 border-brandCyan pl-3">4. 실측 성능 데이터: MW 충전 시 승온 거동</h2>
             <div class="bg-brandSurface rounded-3xl p-8 border border-gray-700">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                    <div class="lg:col-span-2">
-                        <img src="Pulse5.png" alt="Performance Graph" class="rounded-xl shadow-lg border border-gray-800">
+                    <div class="lg:col-span-2 bg-gray-900/40 rounded-2xl p-6 border border-gray-800 shadow-inner min-h-[350px]">
+                        <!-- New Performance Chart Instance (Ref: Pulse5.png) -->
+                        <canvas id="pulsePerformanceChart"></canvas>
                     </div>
                     <div>
                         <h3 class="text-lg font-bold text-white mb-6">Test Scenario: -20°C Cold Start</h3>
@@ -1114,6 +1213,46 @@ window.addEventListener('load', function() {
                 x: {
                     grid: { display: false }
                 }
+            }
+        }
+    });
+
+    const ctx5 = document.getElementById('pulsePerformanceChart').getContext('2d');
+    new Chart(ctx5, {
+        type: 'line',
+        data: {
+            labels: ['0', '5', '10', '15', '20', '25', '30', '35'],
+            datasets: [
+                {
+                    label: '메가와트(MW) 펄스 가열 (°C)',
+                    data: [-20, -12, -4, 5, 14, 22, 28, 30],
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#f59e0b'
+                },
+                {
+                    label: '150kW 충전기 가열 (°C)',
+                    data: [-20, -16, -11, -5, 0, 4, 5, 5],
+                    borderColor: '#64748b',
+                    borderDash: [5, 5],
+                    tension: 0.4,
+                    borderWidth: 2
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
+                tooltip: commonTooltipLogic
+            },
+            scales: {
+                y: { grid: { color: '#334155' }, title: { display: true, text: 'Cell Temp (°C)' } },
+                x: { grid: { display: false }, title: { display: true, text: 'Time (mins)' } }
             }
         }
     });

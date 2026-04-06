@@ -57,21 +57,43 @@ tailwind.config = {
 }
 </script>
 </head>
-<body class="antialiased">
+<body class="antialiased overflow-hidden"> <!-- Lock scroll initially -->
+
+<!-- AUTH GATE OVERLAY -->
+<div id="auth-overlay" class="fixed inset-0 z-[100] flex items-center justify-center bg-brandBase transition-opacity duration-1000">
+    <div class="glass p-10 rounded-3xl border border-gray-700 shadow-2xl max-w-md w-full text-center">
+        <div class="w-20 h-20 bg-brandBlue/10 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl text-brandBlue animate-pulse-glow">
+            🛡️
+        </div>
+        <h2 class="text-2xl font-black text-white mb-2">ACCESS AUTHORIZATION</h2>
+        <p class="text-gray-500 text-sm mb-8 uppercase tracking-widest">Engineering Personnel Only</p>
+        
+        <div class="space-y-4">
+            <input type="password" id="auth-code" autofocus
+                class="w-full bg-gray-800 border border-gray-600 rounded-xl px-4 py-3 text-white text-center text-xl font-mono focus:border-brandBlue focus:outline-none transition-all placeholder:text-gray-700"
+                placeholder="••••">
+            <div id="auth-error" class="hidden text-red-400 text-xs font-bold">INVALID ACCESS CODE</div>
+            <button onclick="attemptAccess()" class="w-full py-4 bg-brandBlue hover:bg-blue-600 text-white font-black rounded-xl transition-all transform active:scale-95 shadow-lg shadow-brandBlue/20">
+                GRANT ACCESS
+            </button>
+        </div>
+        <div class="mt-8 text-[10px] text-gray-600 font-mono">ENCRYPTED END-TO-END | AUDITED SYSTEM</div>
+    </div>
+</div>
 
 <nav class="sticky top-0 z-50 bg-brandBase/80 backdrop-blur-md border-b border-gray-800">
     <div class="max-w-7xl mx-auto px-4">
-        <div class="flex justify-center space-x-4 md:space-x-8 h-16 items-center">
-            <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="px-4 py-2 rounded-full font-bold transition-all duration-300 bg-brandBlue text-white shadow-lg shadow-brandBlue/20 text-sm md:text-base">
+        <div class="flex flex-nowrap overflow-x-auto no-scrollbar justify-start md:justify-center space-x-2 md:space-x-8 h-16 items-center">
+            <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="flex-shrink-0 px-4 py-2 rounded-full font-bold transition-all duration-300 bg-brandBlue text-white shadow-lg shadow-brandBlue/20 text-xs md:text-sm">
                 📊 기술 대시보드
             </button>
-            <button onclick="switchTab('mechanism')" id="tab-btn-mechanism" class="px-4 py-2 rounded-full font-bold transition-all duration-300 text-gray-400 hover:text-white hover:bg-gray-800 text-sm md:text-base">
+            <button onclick="switchTab('mechanism')" id="tab-btn-mechanism" class="flex-shrink-0 px-4 py-2 rounded-full font-bold transition-all duration-300 text-gray-400 hover:text-white hover:bg-gray-800 text-xs md:text-sm">
                 ⚡ 펄스 히팅 메커니즘
             </button>
-            <button onclick="switchTab('summary')" id="tab-btn-summary" class="px-4 py-2 rounded-full font-bold transition-all duration-300 text-gray-400 hover:text-white hover:bg-gray-800 text-sm md:text-base">
+            <button onclick="switchTab('summary')" id="tab-btn-summary" class="flex-shrink-0 px-4 py-2 rounded-full font-bold transition-all duration-300 text-gray-400 hover:text-white hover:bg-gray-800 text-xs md:text-sm">
                 📝 요약 보고서
             </button>
-            <button onclick="switchTab('deepdive')" id="tab-btn-deepdive" class="px-4 py-2 rounded-full font-bold transition-all duration-300 text-gray-400 hover:text-white hover:bg-gray-800 text-sm md:text-base">
+            <button onclick="switchTab('deepdive')" id="tab-btn-deepdive" class="flex-shrink-0 px-4 py-2 rounded-full font-bold transition-all duration-300 text-gray-400 hover:text-white hover:bg-gray-800 text-xs md:text-sm">
                 📜 심층 분석 전문
             </button>
         </div>
@@ -809,6 +831,51 @@ Summary of Plan: Introduction to cold-weather battery issues -> Electrical mecha
 <script>
 // Tab Switching Logic
 // Tab Switching Logic
+// Auth Logic
+async function attemptAccess() {
+    const code = document.getElementById('auth-code').value;
+    const errorEl = document.getElementById('auth-error');
+    
+    try {
+        const response = await fetch('/api/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code })
+        });
+        
+        const data = await response.json();
+        
+        if (data.authorized) {
+            const overlay = document.getElementById('auth-overlay');
+            overlay.classList.add('opacity-0');
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                document.body.classList.remove('overflow-hidden');
+            }, 1000);
+            sessionStorage.setItem('authorized', 'true');
+        } else {
+            errorEl.classList.remove('hidden');
+            document.getElementById('auth-code').value = '';
+        }
+    } catch (err) {
+        console.error('Auth Error:', err);
+    }
+}
+
+// Check session on load
+window.addEventListener('DOMContentLoaded', () => {
+    if (sessionStorage.getItem('authorized') === 'true') {
+        const overlay = document.getElementById('auth-overlay');
+        overlay.style.display = 'none';
+        document.body.classList.remove('overflow-hidden');
+    }
+    
+    // Add enter key listener
+    document.getElementById('auth-code')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') attemptAccess();
+    });
+});
+
 function switchTab(tabId) {
     const tabs = ['dashboard', 'mechanism', 'summary', 'deepdive', 'resources'];
     tabs.forEach(t => {

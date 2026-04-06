@@ -147,6 +147,9 @@ Summary of Plan: Introduction to cold-weather battery issues -> Electrical mecha
                     <p class="text-gray-400 leading-relaxed text-sm">
                         <strong class="text-brandAmber">Pulse1.png 기반 분석:</strong> 셀프 히팅의 핵심은 배터리 팩을 두 개의 독립적인 논리 그룹(Upper/Lower Half Pack)으로 분할 관리하는 데 있습니다. 이를 위해 기존 NE BSA 대비 더 많은 전장 부품인 5개의 릴레이와 2개의 전류 센서가 탑재되어 정밀한 전류 경로 제어를 수행합니다.
                     </p>
+                    <div class="mb-8 mt-6 rounded-2xl overflow-hidden border border-gray-800 shadow-2xl relative group bg-white/5 p-4 flex justify-center">
+                        <img src="Pulse1.png" alt="BSA 고전압회로도" class="max-w-full h-auto rounded-xl shadow-lg border border-gray-700">
+                    </div>
                     <div class="bg-gray-900/80 rounded-3xl p-8 border border-gray-800 shadow-2xl">
                         <table class="w-full text-xs font-mono">
                             <thead>
@@ -324,6 +327,9 @@ Summary of Plan: Introduction to cold-weather battery issues -> Electrical mecha
             <p class="text-gray-400 text-sm mb-10 max-w-2xl leading-relaxed">
                 <strong class="text-brandBlue">Pulse2.png 기반 분석:</strong> 고전압 릴레이의 On/Off 조합을 통해 총 네 가지 케이스의 고전압 회로(전류 경로) 구현이 가능합니다. 셀프 히팅 시에는 Case 1과 같이 릴레이 4개를 동시에 On 상태로 유지합니다.
             </p>
+            <div class="mb-10 rounded-2xl overflow-hidden border border-gray-800 shadow-2xl relative group bg-white/5 p-4 flex justify-center">
+                <img src="Pulse2.png" alt="릴레이 조합 제어" class="max-w-full h-auto rounded-xl shadow-lg border border-gray-700">
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
                 <!-- CASE 1 -->
                 <div class="bg-gray-900/40 p-8 rounded-3xl border border-brandAmber/30 relative group transition-all hover:bg-gray-900/60 shadow-lg">
@@ -394,6 +400,16 @@ Summary of Plan: Introduction to cold-weather battery issues -> Electrical mecha
                     <p class="text-gray-400 text-sm leading-relaxed">
                         <strong class="text-brandCyan">Pulse3 & Pulse4.png 기반 분석:</strong> 인버터 SiC 스위칭과 모터 인덕턴스를 활용한 4단계 에너지 펌핑 알고리즘입니다. 에너지를 상하부 팩 사이를 초당 수천 번 교차 이동시켜 내부 화학 반응 속도를 극대화합니다.
                     </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 mb-8">
+                        <div class="rounded-2xl overflow-hidden border border-gray-800 shadow-2xl bg-white/5 p-4 flex flex-col items-center">
+                            <span class="text-brandCyan font-bold text-xs mb-3 uppercase tracking-widest border-b border-brandCyan/30 pb-2 w-full text-center">Step 1 & 2 (Pulse 3)</span>
+                            <img src="Pulse3.png" alt="고주파 펄스 사이클 1/2" class="max-w-full h-auto rounded-xl shadow-lg">
+                        </div>
+                        <div class="rounded-2xl overflow-hidden border border-gray-800 shadow-2xl bg-white/5 p-4 flex flex-col items-center">
+                            <span class="text-brandCyan font-bold text-xs mb-3 uppercase tracking-widest border-b border-brandCyan/30 pb-2 w-full text-center">Step 3 & 4 (Pulse 4)</span>
+                            <img src="Pulse4.png" alt="고주파 펄스 사이클 2/2" class="max-w-full h-auto rounded-xl shadow-lg">
+                        </div>
+                    </div>
                     <div class="space-y-6">
                         <div class="bg-gray-900/50 p-6 rounded-3xl border border-gray-800 flex items-start space-x-6">
                             <div class="w-12 h-12 bg-brandAmber/20 rounded-full flex items-center justify-center text-brandAmber flex-shrink-0">A</div>
@@ -504,6 +520,9 @@ Summary of Plan: Introduction to cold-weather battery issues -> Electrical mecha
                     <p class="text-gray-400 text-sm leading-relaxed">
                         <strong class="text-brandAmber">Pulse5.png 기반 실측 데이터:</strong> -20°C 극저온 환경에서의 냉간 시동(Cold Start) 테스트 결과입니다. MW급 초고속 충전기 연동 시, 펄스 히팅 기술을 통해 배터리 승온 속도를 극대화하여 충전 효율을 비약적으로 향상시킵니다.
                     </p>
+                    <div class="mb-8 mt-6 rounded-2xl overflow-hidden border border-gray-800 shadow-2xl relative group bg-white/5 p-4 flex justify-center">
+                        <img src="Pulse5.png" alt="고속 충전 거동 데이터" class="max-w-full h-auto rounded-xl shadow-lg border border-gray-700">
+                    </div>
                     <div class="overflow-x-auto bg-gray-900/80 rounded-3xl border border-gray-800 p-8 shadow-inner">
                         <table class="w-full text-xs font-mono">
                             <thead>

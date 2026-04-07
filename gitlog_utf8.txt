@@ -1,0 +1,15 @@
+﻿0d3db65 Fix local fonts, restore auth logic encoding, and point to v3 images
+08f8502 Hard rename Pulse image files to bypass all cache
+190bfd0 Add cache buster to images
+b70707e Update fonts and replace Pulse images
+21d35c1 feat: embed 5 analysis images into the dashboard visually
+4b7ae42 feat: merge dashboard and mechanism, update auth security
+fe4f31f Confirmed SVG Native implementation for mechanism diagrams
+3f088ea Replace broken image paths with high-fidelity SVG and CSS diagrams; fix Vercel routing
+80c6916 Implement backend authentication and fix navigation tab visibility
+fe4aaca Add Pulse Heating Mechanism tab and technical assets
+cb901a6 Rollback: Removed password gate and technical resources tab
+153d0bd Add Technical Resources tab with categorized links and articles
+1e9e7cd Add password protection gate (Code: 7345477)
+4d0716c Fix HTML structure and tab switching logic
+cc3c732 Expand Dashboard & Summary tabs with richer technical content and visualizations
